@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BehaviorAssess — Prototype Part 2</title>
+<style>
+  /* === TOKENS === */
+  :root {
+    --primary: #4F46E5;
+    --primary-hover: #4338CA;
+    --primary-fg: #fff;
+    --destructive: #EF4444;
+    --destructive-hover: #DC2626;
+    --border: #e4e7eb;
+    --bg: #fff;
+    --sidebar-bg: #f4f4f5;
+    --muted: #71717a;
+    --muted-bg: #f9fafb;
+    --text: #111827;
+    --text-sm: #374151;
+    --radius: 6px;
+    --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1);
+    --green: #16a34a; --green-bg: #f0fdf4; --green-border: #bbf7d0;
+    --amber: #d97706; --amber-bg: #fffbeb; --amber-border: #fde68a;
+    --red-bg: #fef2f2; --red-border: #fecaca;
+    --blue-bg: #eff6ff; --blue-border: #bfdbfe;
+    --indigo-bg: #eef2ff;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; font-size: 14px; color: var(--text); background: var(--bg); }
+
+  /* === LAYOUT === */
+  .app { display: flex; height: 100vh; overflow: hidden; }
+  .sidebar { width: 240px; min-width: 240px; background: var(--sidebar-bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 0; }
+  .sidebar-logo { padding: 20px 16px 12px; font-weight: 700; font-size: 15px; color: var(--primary); letter-spacing: -.3px; border-bottom: 1px solid var(--border); }
+  .sidebar-nav { flex: 1; padding: 8px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: var(--radius); font-size: 13.5px; color: var(--text-sm); cursor: pointer; text-decoration: none; transition: background .1s; }
+  .nav-item:hover { background: #e9e9eb; }
+  .nav-item.active { background: var(--indigo-bg); color: var(--primary); font-weight: 500; }
+  .sidebar-user { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+  .main { flex: 1; overflow-y: auto; background: var(--bg); }
+  .page-header { padding: 24px 32px 0; border-bottom: 1px solid var(--border); margin-bottom: 0; }
+  .page-title { font-size: 20px; font-weight: 600; margin-bottom: 16px; }
+  .content { padding: 28px 32px; }
+
+  /* === CENTERED CARD (Auth/Participant) === */
+  .centered { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--muted-bg); }
+  .card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow-md); padding: 40px 36px; width: 100%; max-width: 400px; }
+  .card-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+  .card-body { color: var(--muted); font-size: 14px; line-height: 1.6; margin-bottom: 24px; }
+
+  /* === FORMS === */
+  .form-group { margin-bottom: 16px; }
+  label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 5px; }
+  input[type=text], input[type=email], input[type=password], textarea, select {
+    width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius);
+    font-size: 14px; font-family: inherit; background: var(--bg); color: var(--text);
+    transition: border-color .15s; outline: none;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79,70,229,.12); }
+  input[readonly] { background: var(--muted-bg); color: var(--muted); }
+  textarea { resize: vertical; min-height: 80px; }
+
+  /* === BUTTONS === */
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: var(--radius); font-size: 13.5px; font-weight: 500; cursor: pointer; border: 1px solid transparent; transition: all .15s; text-decoration: none; }
+  .btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .btn-primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+  .btn-outline { background: var(--bg); color: var(--text); border-color: var(--border); }
+  .btn-outline:hover { background: var(--muted-bg); }
+  .btn-ghost { background: transparent; color: var(--muted); border-color: transparent; }
+  .btn-destructive { background: var(--destructive); color: #fff; border-color: var(--destructive); }
+  .btn-destructive:hover { background: var(--destructive-hover); }
+  .btn-sm { padding: 5px 10px; font-size: 12.5px; }
+  .btn-full { width: 100%; justify-content: center; }
+  .btn-link { background: none; border: none; color: var(--primary); cursor: pointer; font-size: 13.5px; padding: 0; text-decoration: underline; font-family: inherit; }
+
+  /* === BADGES === */
+  .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px; font-size: 11.5px; font-weight: 500; }
+  .badge-green { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+  .badge-amber { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+  .badge-blue { background: var(--blue-bg); color: #1d4ed8; border: 1px solid var(--blue-border); }
+  .badge-red { background: var(--red-bg); color: var(--destructive); border: 1px solid var(--red-border); }
+  .badge-zinc { background: #f4f4f5; color: #52525b; border: 1px solid #d4d4d8; }
+
+  /* === ALERTS === */
+  .alert { padding: 12px 14px; border-radius: var(--radius); font-size: 13.5px; margin-bottom: 16px; border: 1px solid; }
+  .alert-red { background: var(--red-bg); border-color: var(--red-border); color: #b91c1c; }
+  .alert-amber { background: var(--amber-bg); border-color: var(--amber-border); color: #92400e; }
+  .alert-green { background: var(--green-bg); border-color: var(--green-border); color: #15803d; }
+
+  /* === MODAL === */
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.4); display: flex; align-items: center; justify-content: center; z-index: 100; }
+  .modal { background: var(--bg); border-radius: 10px; box-shadow: 0 20px 60px rgba(0,0,0,.2); padding: 28px; width: 100%; max-width: 480px; position: relative; }
+  .modal-wide { max-width: 640px; }
+  .modal-title { font-size: 16px; font-weight: 600; margin-bottom: 10px; }
+  .modal-body { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 24px; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+  .modal-x { position: absolute; top: 16px; right: 16px; background: none; border: none; cursor: pointer; color: var(--muted); font-size: 18px; line-height: 1; }
+
+  /* === TABLE === */
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: 12px; font-weight: 600; color: var(--muted); padding: 10px 12px; border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: .04em; }
+  td { padding: 11px 12px; border-bottom: 1px solid var(--border); font-size: 13.5px; color: var(--text-sm); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--muted-bg); }
+  .table-wrap { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+
+  /* === TABS === */
+  .tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+  .tab { padding: 9px 16px; font-size: 13.5px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; color: var(--muted); }
+  .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 500; }
+
+  /* === SECTION === */
+  .section { margin-bottom: 32px; }
+  .section-title { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 14px; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+  /* === PROGRESS === */
+  .progress-bar { height: 6px; background: #e9eaeb; border-radius: 3px; overflow: hidden; margin-bottom: 4px; }
+  .progress-fill { height: 100%; background: var(--primary); border-radius: 3px; transition: width .3s; }
+  .progress-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 20px; }
+
+  /* === QUESTION CARD === */
+  .q-option { border: 1.5px solid var(--border); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 8px; cursor: pointer; transition: all .15s; font-size: 14px; }
+  .q-option:hover { border-color: var(--primary); background: var(--indigo-bg); }
+  .q-option.selected { border-color: var(--primary); background: var(--indigo-bg); color: var(--primary); font-weight: 500; }
+
+  /* === SPINNER === */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner { width: 36px; height: 36px; border: 3px solid #e0e0e0; border-top-color: var(--primary); border-radius: 50%; animation: spin .7s linear infinite; margin: 0 auto 16px; }
+
+  /* === ICONS === */
+  .icon-wrap { display: flex; justify-content: center; margin-bottom: 20px; }
+  .icon-circle { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; }
+  .icon-green { background: var(--green-bg); }
+  .icon-red { background: var(--red-bg); }
+  .icon-amber { background: var(--amber-bg); }
+  .icon-indigo { background: var(--indigo-bg); }
+
+  /* === RADIO CARD === */
+  .radio-card { border: 1.5px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px; cursor: pointer; display: flex; align-items: flex-start; gap: 12px; }
+  .radio-card.selected { border-color: var(--primary); background: var(--indigo-bg); }
+  .radio-dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; margin-top: 2px; }
+  .radio-card.selected .radio-dot { border-color: var(--primary); background: var(--primary); box-shadow: inset 0 0 0 4px #fff; }
+  .radio-label { font-weight: 500; font-size: 13.5px; }
+  .radio-desc { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+
+  /* === DROP ZONE === */
+  .dropzone { border: 2px dashed var(--border); border-radius: 8px; padding: 36px 24px; text-align: center; color: var(--muted); cursor: pointer; transition: border-color .15s; }
+  .dropzone:hover { border-color: var(--primary); color: var(--primary); }
+  .dropzone-icon { font-size: 32px; margin-bottom: 10px; }
+  .dropzone-text { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+  .dropzone-sub { font-size: 12.5px; }
+
+  /* === STAT CARD === */
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+  .stat-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; }
+  .stat-value { font-size: 26px; font-weight: 700; color: var(--text); }
+  .stat-label { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+
+  /* === TRAIT BAR === */
+  .trait-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .trait-name { width: 110px; font-size: 13px; color: var(--text-sm); font-weight: 500; flex-shrink: 0; }
+  .trait-bar-wrap { flex: 1; height: 8px; background: #e9eaeb; border-radius: 4px; overflow: hidden; }
+  .trait-bar-fill { height: 100%; border-radius: 4px; }
+  .trait-pct { width: 36px; font-size: 12.5px; color: var(--muted); text-align: right; }
+
+  /* === QUESTION EDIT ROW === */
+  .ans-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .ans-label { font-size: 12px; font-weight: 600; width: 20px; color: var(--muted); flex-shrink: 0; }
+  .ans-input { flex: 1; }
+  .ans-select { width: 160px; }
+
+  /* === STAGED Q CARD === */
+  .staged-card { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 10px; overflow: hidden; }
+  .staged-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--muted-bg); }
+  .staged-body { padding: 14px 16px; }
+  .staged-actions { display: flex; gap: 6px; }
+
+  /* === TIMELINE BANNER === */
+  .banner { padding: 10px 16px; border-radius: var(--radius); font-size: 13.5px; display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+  .banner-amber { background: var(--amber-bg); border: 1px solid var(--amber-border); color: #92400e; }
+
+  /* === MOBILE FRAME === */
+  .mobile-frame { max-width: 390px; margin: 0 auto; border-left: 1px solid var(--border); border-right: 1px solid var(--border); min-height: 100vh; background: var(--bg); }
+
+  /* === SCREEN VISIBILITY === */
+  .screen { display: none; }
+  .screen.active { display: block; }
+  .screen-app { display: none; }
+  .screen-app.active { display: flex; }
+
+  /* === DIMMED BACKGROUND === */
+  .dimmed { opacity: .35; pointer-events: none; }
+
+  /* === QUICK NAV === */
+  #qnav { position: fixed; bottom: 0; left: 0; right: 0; background: #1e1e2e; color: #cdd6f4; font-size: 11.5px; display: flex; align-items: center; flex-wrap: wrap; gap: 2px; padding: 6px 10px; z-index: 200; }
+  .qnav-section { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; }
+  .qnav-label { color: #6c7086; font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; margin-right: 4px; padding-left: 8px; }
+  .qnav-btn { background: #313244; border: none; color: #cdd6f4; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; font-family: inherit; }
+  .qnav-btn:hover { background: #45475a; }
+  .qnav-part1 { background: #4F46E5; color: #fff; padding: 3px 10px; border-radius: 4px; border: none; cursor: pointer; font-size: 11px; font-family: inherit; margin-right: 8px; }
+  body { padding-bottom: 44px; }
+
+  /* === HELPERS === */
+  .flex { display: flex; }
+  .items-center { align-items: center; }
+  .justify-between { justify-content: space-between; }
+  .gap-2 { gap: 8px; }
+  .gap-3 { gap: 12px; }
+  .mb-1 { margin-bottom: 4px; }
+  .mb-2 { margin-bottom: 8px; }
+  .mb-3 { margin-bottom: 12px; }
+  .mb-4 { margin-bottom: 16px; }
+  .mb-6 { margin-bottom: 24px; }
+  .mt-2 { margin-top: 8px; }
+  .mt-3 { margin-top: 12px; }
+  .text-muted { color: var(--muted); }
+  .text-sm { font-size: 13px; }
+  .text-xs { font-size: 12px; }
+  .text-center { text-align: center; }
+  .font-semibold { font-weight: 600; }
+  .w-full { width: 100%; }
+</style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!--  SCREEN: email-verify                                         -->
+<!-- ============================================================ -->
+<div id="screen-email-verify" class="screen active">
+  <div class="centered">
+    <div class="card text-center">
+      <div class="icon-wrap"><div class="icon-circle icon-indigo">✉️</div></div>
+      <div class="card-title">Check your inbox</div>
+      <div class="card-body">We sent a verification link to <strong>sarah@company.com</strong>. Click the link to activate your account.</div>
+      <button class="btn-link mb-4" style="display:block;text-align:center;margin:0 auto 16px;">Resend verification email</button>
+      <button class="btn btn-outline btn-full" onclick="go('screen-login-error')">Back to login</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  SCREEN: reset-request                                        -->
+<!-- ============================================================ -->
+<div id="screen-reset-request" class="screen">
+  <div class="centered">
+    <div class="card">
+      <div class="card-title">Reset your password</div>
+      <div class="card-body">Enter your email and we'll send you a reset link.</div>
+      <div class="form-group">
+        <label>Email address</label>
+        <input type="email" placeholder="sarah@company.com">
+      </div>
+      <button class="btn btn-primary btn-full mb-3" onclick="go('screen-reset-confirm')">Send reset link</button>
+      <div class="text-center"><button class="btn-link" onclick="go('screen-login-error')">Back to login</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  SCREEN: reset-confirm                                        -->
+<!-- ============================================================ -->
+<div id="screen-reset-confirm" class="screen">
+  <div class="centered">
+    <div class="card text-center">
+      <div class="icon-wrap"><div class="icon-circle icon-green">✓</div></div>
+      <div class="card-title">Reset link sent</div>
+      <div class="card-body">Check your inbox for instructions to reset your password. The link expires in 1 hour.</div>
+      <button class="btn btn-outline btn-full" onclick="go('screen-login-error')">Back to login</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  SCREEN: login-error                                          -->
+<!-- ============================================================ -->
+<div id="screen-login-error" class="screen">
+  <div class="centered">
+    <div class="card">
+      <div class="card-title mb-4">Sign in to BehaviorAssess</div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" value="sarah@company.com">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" value="wrongpass" style="border-color:#ef4444;">
+        <div style="color:#b91c1c;font-size:12.5px;margin-top:5px;">Invalid email or password. Please try again.</div>
+      </div>
+      <button class="btn btn-primary btn-full mb-3" onclick="go('screen-settings')">Sign in</button>
+      <div class="text-center text-sm text-muted">
+        <button class="btn-link" onclick="go('screen-reset-request')">Forgot password?</button>
+        &nbsp;·&nbsp; No account? <button class="btn-link">Sign up</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  SCREEN: edit-warning (modal over dashboard bg)              -->
+<!-- ============================================================ -->
+<div id="screen-edit-warning" class="screen-app">
+  <div class="sidebar">
+    <div class="sidebar-logo">BehaviorAssess</div>
+    <div class="sidebar-nav">
+      <div class="nav-item active">📋 Assessments</div>
+      <div class="nav-item" onclick="go('screen-settings')">⚙ Settings</div>
+    </div>
+    <div class="sidebar-user"><div class="avatar">SC</div><div><div style="font-size:13px;font-weight:500;">Sarah Chen</div><div class="text-xs text-muted">sarah@company.com</div></div></div>
+  </div>
+  <div class="main dimmed" style="padding:28px 32px;">
+    <div class="flex justify-between items-center mb-6">
+      <div class="page-title" style="margin:0;">Assessments</div>
+    </div>
+    <div class="table-wrap">
+      <table><thead><tr><th>Name</th><th>Framework</th><th>Status</th><th>Invited</th><th>Completed</th></tr></thead>
+      <tbody>
+        <tr><td>Sales Team DISC Assessment</td><td>DISC</td><td><span class="badge badge-green">Published</span></td><td>5</td><td>4</td></tr>
+        <tr><td>Q3 Culture Fit</td><td>Big Five</td><td><span class="badge badge-zinc">Draft</span></td><td>—</td><td>—</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+  <!-- Modal -->
+  <div class="modal-backdrop" style="background:rgba(0,0,0,.25);">
+    <div class="modal">
+      <button class="modal-x" onclick="go('screen-settings')">×</button>
+      <div class="modal-title">Create new version?</div>
+      <div class="modal-body">This assessment has 5 active invitations. Editing will create <strong>Version 2</strong>. Existing participants will continue on Version 1 and won't see your changes.</div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="go('screen-settings')">Cancel</button>
+        <button class="btn btn-primary" onclick="go('screen-settings')">Edit &amp; Create Version 2</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  SCREEN: delete-confirm                                       -->
+<!-- ============================================================ -->
+<div id="screen-delete-confirm" class="screen-app">
+  <div class="sidebar">
+    <div class="sidebar-logo">BehaviorAssess</div>
+    <div class="sidebar-nav">
+      <div class="nav-item active">📋 Assessments</div>
+      <div class="nav-item" onclick="go('screen-settings')">⚙ Settings</div>
+    </div>
+    <div class="sidebar-user"><div class="avatar">SC</div><div><div style="font-size:13px;font-weight:500;">Sarah Chen</div></div></div>
+  </div>
+  <div class="main dimmed" style="padding:28px 32px;">
+    <div class="table-wrap"><table><thead><tr><th>Name</th><th>Status</th></tr></thead><tbody>
+      <tr><td>Q3 Culture Fit</td><td><span class="badge badge-zinc">Draft</span></td></tr>
+    </tbody></table></div>
+  </div>
+  <div class="modal-backdrop" style="background:rgba(0,0,0,.25);">
+    <div class="modal" style="max-width:400px;">
+      <button class="modal-x" onclick="go('screen-settings')">×</button>
+      <div class="modal-title">Delete assessment?</div>
+      <div class="modal-body">This will permanently delete <strong>"Q3 Culture Fit"</strong>. This cannot be undone.</div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="go('screen-settings')">Cancel</button>
+        <button class="btn btn-destructive" onclick="go('screen-settings')">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  SCREEN: settings                                             -->
+<!-- ============================================================ -->
+<div id="screen-settings" class="screen-app">
+  <div class="sidebar">
+    <div class="sidebar-logo">BehaviorAssess</div>
+    <div class="sidebar-nav">
+      <div class="nav-item" onclick="go('screen-analytics-all')">📋 Assessments</div>
+      <div class="nav-item active">⚙ Settings</div>
+    </div>
+    <div class="sidebar-user"><div class="avatar">SC</div><div><div style="font-size:13px;font-weight:500;">Sarah Chen</div><div class="text-xs text-muted">sarah@company.com</div></div></div>
+  </div>
+  <div class="main">
+    <div class="page-header"><div class="page-title">Account Settings</div></div>
+    <div class="content" style="max-width:560px;">
+      <div class="section">
+        <div class="section-title">Profile</div>
+        <div class="form-group"><label>Full name</label><input type="text" value="Sarah Chen"></div>
+        <div class="form-group">
+          <label>Email address</label>
+          <div class="flex items-center gap-2">
+            <input type="email" value="sarah@company.com" readonly style="flex:1;">
+            <span class="badge badge-green">Verified ✓</span>
+          </div>
+        </div>
+      </div>
+      <hr class="divider">
+      <div class="section">
+        <div class="section-title">Security</div>
+        <div class="form-group"><label>Current password</label><input type="password" placeholder="••••••••"></div>
+        <div class="form-group"><label>New password</label><input type="password" placeholder="Min. 8 characters, 1 number, 1 special char"></div>
+        <div class="form-group"><label>Confirm new password</label><input type="password" placeholder="••••••••"></div>
+        <button class="btn btn-outline btn-sm">Update password</button>
+      </div>
+      <hr class="divider">
+      <button class="btn btn-primary">Save changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  SCREEN: add-question-modal                                   -->
+<!-- ============================================================ -->
+<div id="screen-add-question-modal" class="screen-app">
+  <div class="sidebar">
+    <div class="sidebar-logo">BehaviorAssess</div>
+    <div class="sidebar-nav"><div class="nav-item active">📋 Assessments</div></div>
+    <div class="sidebar-user"><div class="avatar">SC</div></div>
+  </div>
+  <div class="main dimmed" style="padding:28px 32px;">
+    <div class="page-title mb-4">Step 2: Add Questions</div>
+    <div class="tabs"><div class="tab active">Manual</div><div class="tab">AI Generate</div></div>
+    <div class="staged-card"><div class="staged-head"><span class="text-sm font-semibold">Q1 · When facing a deadline, you tend to…</span><div class="staged-actions"><span class="badge badge-zinc">D</span></div></div></div>
+  </div>
+  <div class="modal-backdrop" style="background:rgba(0,0,0,.3);">
+    <div class="modal modal-wide">
+      <button class="modal-x" onclick="go('screen-ai-loading')">×</button>
+      <div class="modal-title mb-3">Add Question</div>
+      <div class="form-group"><label>Question text</label><textarea placeholder="When facing a tight deadline, you tend to..."></textarea></div>
+      <div class="mb-3"><div class="section-title">Answer options &amp; trait mapping</div></div>
+      <div class="ans-row"><div class="ans-label">A</div><input type="text" class="ans-input" value="Take charge and push the team to meet it"><select class="ans-select"><option selected>D — Dominance</option><option>I — Influence</option><option>S — Steadiness</option><option>C — Conscientiousness</option></select></div>
+      <div class="ans-row"><div class="ans-label">B</div><input type="text" class="ans-input" placeholder="Answer option B"><select class="ans-select"><option>D — Dominance</option><option>I — Influence</option><option>S — Steadiness</option><option>C — Conscientiousness</option></select></div>
+      <div class="ans-row"><div class="ans-label">C</div><input type="text" class="ans-input" placeholder="Answer option C"><select class="ans-select"><option>D — Dominance</option><option>I — Influence</option><option>S — Steadiness</option><option>C — Conscientiousness</option></select></div>
+      <div class="ans-row mb-4"><div class="ans-label">D</div><input type="text" class="ans-input" placeholder="Answer option D"><select class="ans-select"><option>D — Dominance</option><option>I — Influence</option><option>S — Steadiness</option><option>C — Conscientiousness</option></select></div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="go('screen-ai-loading')">Cancel</button>
+        <button class="btn btn-primary" onclick="go('screen-ai-loading')">Save Question</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  SCREEN: ai-loading                                           -->
+<!-- ============================================================ -->
+<div id="screen-ai-loading" class="screen-app">
+  <div class="sidebar">
+    <div class="sidebar-logo">BehaviorAssess</div>
+    <div class="sidebar-nav"><div class="nav-item active">📋 Assessments</div></div>
+    <div class="sidebar-user"><div class="avatar">SC</div></div>
+  </div>
+  <div class="main" style="padding:28px 32px;">
+    <div class="page-title mb-4">Step 2: Add Questions</div>
+    <div class="tabs"><div class="tab">Manual</div><div class="tab active">AI Generate</div></div>
+    <div class="form-group"><label>Describe what you want to assess</label><textarea style="min-height:60px;">assertiveness and teamwork for a sales role</textarea></div>
+    <div style="text-align:center;padding:36px 0;">
+      <div class="spinner"></div>
+      <div style="font-weight:500;margin-bottom:6px;">Generating 10 questions aligned to DISC framework…</div>
+      <div class="text-sm text-muted mb-3">Usually takes 10–20 seconds</div>
+      <button class="btn-link" onclick="go('screen-ai-error')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  SCREEN: ai-error                                             -->
+<!-- ============================================================ -->
+<div id="screen-ai-error" class="screen-app">
+  <div class="sidebar">
+    <div class="sidebar-logo">BehaviorAssess</div>
+    <div class="sidebar-nav"><div class="nav-item active">📋 Assessments</div></div>
+    <div class="sidebar-user"><div class="avatar">SC</div></div>
+  </div>
+  <div class="main" style="padding:28px 32px;">
+    <div class="page-title mb-4">Step 2: Add Questions</div>
+    <div class="tabs"><div class="tab">Manual</div><div class="tab active">AI Generate</div></div>
+    <div class="form-group"><label>Describe what you want to assess</label><textarea style="min-height:60px;">assertiveness and teamwork for a sales role</textarea></div>
+    <div class="alert alert-red">
+      <strong>Generation failed.</strong> The AI couldn't generate questions for this prompt. Try rephrasing or being more specific about the role or behaviors you want to assess.
+    </div>
+    <div class="flex gap-2">
+      <button class="btn btn-primary" onclick="go('screen-ai-loading')">Try again</button>
+      <button class="btn btn-outline">Edit prompt</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  SCREEN: ai-edit-question                                     -->
+<!-- ============================================================ -->
+<div id="screen-ai-edit-question" class="screen-app">
+  <div class="sidebar">
+    <div class="sidebar-logo">BehaviorAssess</div>
+    <div class="sidebar-nav"><div class="nav-item active">📋 Assessments</div></div>
+    <div class="sidebar-user"><div class="avatar">SC</div></div>
+  </div>
+  <div class="main" style="padding:28px 32px;">
+    <div class="page-title mb-4">Step 2: Add Questions</div>
+    <div class="tabs"><div class="tab">Manual</div><div class="tab active">AI Generate</div></div>
+    <div class="text-sm text-muted mb-3">10 questions generated. Review, edit, or regenerate before accepting.</div>
+
+    <!-- Collapsed card -->
+    <div class="staged-card mb-2">
+      <div class="staged-head">
+        <span class="text-sm font-semibold">Q1 · When facing a tight deadline, you tend to take charge and…</span>
+        <div class="staged-actions">
+          <button class="btn btn-sm btn-outline">Edit</button>
+          <button class="btn btn-sm btn-ghost">↺</button>
+          <button class="btn btn-sm btn-primary" onclick="go('screen-csv-upload')">Accept</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Expanded edit card -->
+    <div class="staged-card" style="border-color:var(--primary);">
+      <div class="staged-head" style="background:var(--indigo-bg);">
+        <span class="text-sm font-semibold" style="color:var(--primary);">Q2 · Editing…</span>
+        <div class="staged-actions">
+          <button class="btn btn-sm btn-outline" onclick="go('screen-csv-upload')">Cancel</button>
+          <button class="btn btn-sm btn-primary" onclick="go('screen-csv-upload')">Save changes</button>
+        </div>
+      </div>
+      <div class="staged-body">
+        <div class="form-group mb-3"><label>Question text</label><textarea style="min-height:56px;">When collaborating with a new team member, your first instinct is to…</textarea></div>
+        <div class="ans-row"><div class="ans-label">A</div><input type="text" class="ans-input" value="Establish clear roles and expectations immediately"><select class="ans-select"><option selected>D — Dominance</option><option>I — Influence</option><option>S — Steadiness</option><option>C — Conscientiousness</option></select></div>
+        <div class="ans-row"><div class="ans-label">B</div><input type="text" class="ans-input" value="Introduce yourself warmly and find common ground"><select class="ans-select"><option>D — Dominance</option><option selected>I — Influence</option><option>S — Steadiness</option><option>C — Conscientiousness</option></select></div>
+        <div class="ans-row"><div class="ans-label">C</div><input type="text" class="ans-input" value="Listen and observe before drawing conclusions"><select class="ans-select"><option>D — Dominance</option><option>I — Influence</option><option selected>S — Steadiness</option><option>C — Conscientiousness</option></select></div>
+        <div class="ans-row"><div class="ans-label">D</div><input type="text" class="ans-input" value="Review their background and prior work first"><select class="ans-select"><option>D — Dominance</option><option>I — Influence</option><option>S — Steadiness</option><option selected>C — Conscientiousness</option></select></div>
+      </div>
+    </div>
+
+    <div class="staged-card mt-2">
+      <div class="staged-head">
+        <span class="text-sm font-semibold">Q3 · In a meeting where everyone disagrees, you…</span>
+        <div class="staged-actions">
+          <button class="btn btn-sm btn-outline">Edit</button>
+          <button class="btn btn-sm btn-ghost">↺</button>
+          <button class="btn btn-sm btn-primary" onclick="go('screen-csv-upload')">Accept</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  SCREEN: csv-upload                                           -->
+<!-- ============================================================ -->
+<div id="screen-csv-upload" class="screen-app">
+  <div class="sidebar">
+    <div class="sidebar-logo">BehaviorAssess</div>
+    <div class="sidebar-nav"><div class="nav-item active">📋 Assessments</div></div>
+    <div class="sidebar-user"><div class="avatar">SC</div></div>
+  </div>
+  <div class="main" style="padding:28px 32px;max-width:680px;">
+    <div class="page-title mb-1">Publish &amp; Send</div>
+    <div class="text-sm text-muted mb-4">Sales Team DISC Assessment · Published · Version 1</div>
+    <div class="alert alert-green">✓ Assessment published successfully.</div>
+    <div class="section-title">Invite participants</div>
+    <div class="tabs mb-4"><div class="tab">Paste emails</div><div class="tab active">Upload CSV</div></div>
+    <div class="dropzone mb-3" onclick="go('screen-invalid-emails')">
+      <div class="dropzone-icon">📄</div>
+      <div class="dropzone-text">Drop CSV here or click to browse</div>
+      <div class="dropzone-sub text-muted">Supported format: one email per row, or comma-separated. Max 500 addresses.</div>
+    </div>
+    <div class="text-xs text-muted">After uploading, we'll validate all addresses before sending.</div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  SCREEN: invalid-emails                                       -->
+<!-- ============================================================ -->
+<div id="screen-invalid-emails" class="screen-app">
+  <div class="sidebar">
+    <div class="sidebar-logo">BehaviorAssess</div>
+    <div class="sidebar-nav"><div class="nav-item active">📋 Assessments</div></div>
+    <div class="sidebar-user"><div class="avatar">SC</div></div>
+  </div>
+  <div class="main" style="padding:28px 32px;max-width:680px;">
+    <div class="page-title mb-4">Publish &amp; Send</div>
+    <div class="alert alert-amber">
+      <strong>2 addresses couldn't be validated and were removed:</strong> <code>notanemail</code>, <code>bad@</code>. Review the remaining 5 valid addresses below.
+    </div>
+    <div class="section-title">5 valid addresses</div>
+    <div class="table-wrap mb-4">
+      <table><tbody>
+        <tr><td>james@corp.com</td><td class="text-right"><span class="badge badge-green">Valid</span></td></tr>
+        <tr><td>sarah@firm.com</td><td class="text-right"><span class="badge badge-green">Valid</span></td></tr>
+        <tr><td>mike@co.com</td><td class="text-right"><span class="badge badge-green">Valid</span></td></tr>
+        <tr><td>diana@startup.io</td><td class="text-right"><span class="badge badge-green">Valid</span></td></tr>
+        <tr><td>alex@agency.com</td><td class="text-right"><span class="badge badge-green">Valid</span></td></tr>
+      </tbody></table>
+    </div>
+    <div class="flex gap-2">
+      <button class="btn btn-outline" onclick="go('screen-csv-upload')">← Back</button>
+      <button class="btn btn-primary" onclick="go('screen-duplicate-warning')">Send 5 invitations</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  SCREEN: duplicate-warning                                    -->
+<!-- ============================================================ -->
+<div id="screen-duplicate-warning" class="screen-app">
+  <div class="sidebar">
+    <div class="sidebar-logo">BehaviorAssess</div>
+    <div class="sidebar-nav"><div class="nav-item active">📋 Assessments</div></div>
+    <div class="sidebar-user"><div class="avatar">SC</div></div>
+  </div>
+  <div class="main dimmed" style="padding:28px 32px;"></div>
+  <div class="modal-backdrop" style="background:rgba(0,0,0,.25);">
+    <div class="modal">
+      <button class="modal-x" onclick="go('screen-invitations-sent')">×</button>
+      <div class="modal-title">Participant already invited</div>
+      <div class="modal-body"><strong>james@corp.com</strong> was already invited to Version 1 of this assessment on Aug 30. Sending again will generate a new dedicated link and invalidate the old one.</div>
+      <div class="modal-actions" style="justify-content:flex-start;flex-direction:column;align-items:stretch;gap:6px;">
+        <button class="btn btn-primary" onclick="go('screen-invitations-sent')">Send Anyway</button>
+        <button class="btn btn-outline" onclick="go('screen-invitations-sent')">Skip This Address</button>
+        <button class="btn btn-ghost" onclick="go('screen-invalid-emails')">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  SCREEN: invitations-sent                                     -->
+<!-- ============================================================ -->
+<div id="screen-invitations-sent" class="screen-app">
+  <div class="sidebar">
+    <div class="sidebar-logo">BehaviorAssess</div>
+    <div class="sidebar-nav"><div class="nav-item active">📋 Assessments</div></div>
+    <div class="sidebar-user"><div class="avatar">SC</div></div>
+  </div>
+  <div class="main" style="display:flex;align-items:center;justify-content:center;">
+    <div style="text-align:center;max-width:360px;padding:40px 0;">
+      <div class="icon-wrap"><div class="icon-circle icon-green" style="width:64px;height:64px;font-size:30px;">✓</div></div>
+      <div style="font-size:22px;font-weight:700;margin-bottom:8px;">5 invitations sent</div>
+      <div class="text-muted mb-6">Participants will receive their dedicated links within a few minutes.</div>
+      <button class="btn btn-primary" onclick="go('screen-analytics-all')">View Dashboard →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  SCREEN: resend-modal                                         -->
+<!-- ============================================================ -->
+<div id="screen-resend-modal" class="screen-app">
+  <div class="sidebar">
+    <div class="sidebar-logo">BehaviorAssess</div>
+    <div class="sidebar-nav"><div class="nav-item active">📋 Assessments</div></div>
+    <div class="sidebar-user"><div class="avatar">SC</div></div>
+  </div>
+  <div class="main dimmed" style="padding:28px 32px;"></div>
+  <div class="modal-backdrop" style="background:rgba(0,0,0,.25);">
+    <div class="modal">
+      <button class="modal-x" onclick="go('screen-analytics-all')">×</button>
+      <div class="modal-title">Invitation options</div>
+      <div class="text-sm text-muted mb-3"><strong>diana@startup.io</strong> · Link expired Sep 6</div>
+      <div id="radio1" class="radio-card selected" onclick="selectRadio('radio1','radio2')">
+        <div class="radio-dot"></div>
+        <div><div class="radio-label">Resend invitation</div><div class="radio-desc">Re-send the current link to their inbox (not available — link has expired)</div></div>
+      </div>
+      <div id="radio2" class="radio-card" onclick="selectRadio('radio2','radio1')">
+        <div class="radio-dot"></div>
+        <div><div class="radio-label">Reissue link</div><div class="radio-desc">Generate a new 7-day link and invalidate the old one</div></div>
+      </div>
+      <div class="modal-actions mt-3">
+        <button class="btn btn-outline" onclick="go('screen-analytics-all')">Cancel</button>
+        <button class="btn btn-primary" onclick="go('screen-analytics-all')">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  SCREEN: analytics-empty                                      -->
+<!-- ============================================================ -->
+<div id="screen-analytics-empty" class="screen-app">
+  <div class="sidebar">
+    <div class="sidebar-logo">BehaviorAssess</div>
+    <div class="sidebar-nav"><div class="nav-item active">📋 Assessments</div><div class="nav-item" onclick="go('screen-settings')">⚙ Settings</div></div>
+    <div class="sidebar-user"><div class="avatar">SC</div></div>
+  </div>
+  <div class="main">
+    <div class="page-header"><div class="page-title">Sales Team DISC Assessment <span class="badge badge-green" style="margin-left:8px;vertical-align:middle;">Published</span></div></div>
+    <div class="content">
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-value">0%</div><div class="stat-label">Completion rate</div></div>
+        <div class="stat-card"><div class="stat-value">0 / 5</div><div class="stat-label">Completed</div></div>
+        <div class="stat-card"><div class="stat-value">5</div><div class="stat-label">Invited</div></div>
+      </div>
+      <div class="section-title mb-3">Trait distribution</div>
+      <div style="background:var(--muted-bg);border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-align:center;color:var(--muted);margin-bottom:24px;">
+        Results will appear as participants complete the assessment.
+      </div>
+      <div class="table-wrap">
+        <table><thead><tr><th>Participant</th><th>Status</th><th>Dominant trait</th><th>Date</th></tr></thead>
+        <tbody>
+          <tr><td>james@corp.com</td><td><span class="badge badge-blue">Invited</span></td><td>—</td><td>—</td></tr>
+          <tr><td>sarah@firm.com</td><td><span class="badge badge-blue">Invited</span></td><td>—</td><td>—</td></tr>
+          <tr><td>mike@co.com</td><td><span class="badge badge-blue">Invited</span></td><td>—</td><td>—</td></tr>
+          <tr><td>diana@startup.io</td><td><span class="badge badge-blue">Invited</span></td><td>—</td><td>—</td></tr>
+          <tr><td>alex@agency.com</td><td><span class="badge badge-blue">Invited</span></td><td>—</td><td>—</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  SCREEN: analytics-all-statuses                               -->
+<!-- ============================================================ -->
+<div id="screen-analytics-all" class="screen-app">
+  <div class="sidebar">
+    <div class="sidebar-logo">BehaviorAssess</div>
+    <div class="sidebar-nav"><div class="nav-item active">📋 Assessments</div><div class="nav-item" onclick="go('screen-settings')">⚙ Settings</div></div>
+    <div class="sidebar-user"><div class="avatar">SC</div></div>
+  </div>
+  <div class="main">
+    <div class="page-header"><div class="page-title">Sales Team DISC Assessment <span class="badge badge-green" style="margin-left:8px;vertical-align:middle;">Published</span></div></div>
+    <div class="content">
+      <div class="flex justify-between items-center mb-4">
+        <div class="stat-grid" style="flex:1;margin:0;margin-right:16px;">
+          <div class="stat-card"><div class="stat-value">60%</div><div class="stat-label">Completion rate</div></div>
+          <div class="stat-card"><div class="stat-value">3 / 5</div><div class="stat-label">Completed</div></div>
+          <div class="stat-card"><div class="stat-value">5</div><div class="stat-label">Invited</div></div>
+        </div>
+        <div>
+          <select style="width:auto;padding:6px 12px;"><option>Version 1 (current)</option><option>Version 2</option></select>
+        </div>
+      </div>
+      <div class="section-title mb-3">Average trait scores</div>
+      <div class="mb-4">
+        <div class="trait-row"><div class="trait-name">Dominance</div><div class="trait-bar-wrap"><div class="trait-bar-fill" style="width:65%;background:#4F46E5;"></div></div><div class="trait-pct">65%</div></div>
+        <div class="trait-row"><div class="trait-name">Influence</div><div class="trait-bar-wrap"><div class="trait-bar-fill" style="width:72%;background:#7C3AED;"></div></div><div class="trait-pct">72%</div></div>
+        <div class="trait-row"><div class="trait-name">Steadiness</div><div class="trait-bar-wrap"><div class="trait-bar-fill" style="width:48%;background:#2563EB;"></div></div><div class="trait-pct">48%</div></div>
+        <div class="trait-row"><div class="trait-name">Conscientiousness</div><div class="trait-bar-wrap"><div class="trait-bar-fill" style="width:58%;background:#0891B2;"></div></div><div class="trait-pct">58%</div></div>
+      </div>
+      <div class="flex justify-between items-center mb-2">
+        <div class="section-title" style="margin:0;">Participants</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <select style="padding:5px 10px;border:1px solid #e4e4e7;border-radius:6px;font-size:13px;color:#374151;background:#fff;cursor:pointer;">
+            <option>All statuses</option>
+            <option>Invited</option>
+            <option>In Progress</option>
+            <option>Completed</option>
+            <option>Expired</option>
+          </select>
+          <button class="btn btn-outline btn-sm">Export CSV</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table><thead><tr><th>Participant</th><th>Status</th><th>Dominant trait</th><th>Date</th><th></th></tr></thead>
+        <tbody>
+          <tr style="cursor:pointer;" onclick="go('screen-resend-modal')"><td>james@corp.com</td><td><span class="badge badge-green">Completed</span></td><td><span class="badge badge-zinc">D</span></td><td>Sep 4</td><td></td></tr>
+          <tr><td>sarah@firm.com</td><td><span class="badge badge-amber">In Progress</span></td><td>—</td><td>—</td><td></td></tr>
+          <tr><td>mike@co.com</td><td><span class="badge badge-blue">Invited</span></td><td>—</td><td>—</td><td></td></tr>
+          <tr onclick="go('screen-resend-modal')" style="cursor:pointer;"><td>diana@startup.io</td><td><span class="badge badge-red">Expired</span></td><td>—</td><td>—</td><td><button class="btn btn-sm btn-outline" onclick="event.stopPropagation();go('screen-resend-modal')">Reissue</button></td></tr>
+          <tr style="cursor:pointer;" onclick="go('screen-resend-modal')"><td>alex@agency.com</td><td><span class="badge badge-green">Completed</span></td><td><span class="badge badge-zinc">I</span></td><td>Sep 5</td><td></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  SCREEN: link-expired (participant)                           -->
+<!-- ============================================================ -->
+<div id="screen-link-expired" class="screen">
+  <div class="centered">
+    <div class="card text-center">
+      <div class="icon-wrap"><div class="icon-circle icon-amber">🕐</div></div>
+      <div class="card-title">This link has expired</div>
+      <div class="card-body">Your assessment link is no longer valid. The link was valid for 7 days from when it was sent.<br><br>Please contact the person who invited you to request a new link.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  SCREEN: already-submitted (participant)                      -->
+<!-- ============================================================ -->
+<div id="screen-already-submitted" class="screen">
+  <div class="centered">
+    <div class="card text-center">
+      <div class="icon-wrap"><div class="icon-circle icon-green">✓</div></div>
+      <div class="card-title">Assessment already completed</div>
+      <div class="card-body">You've already submitted this assessment. Thank you for your participation.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  SCREEN: resume-prompt (participant)                          -->
+<!-- ============================================================ -->
+<div id="screen-resume-prompt" class="screen">
+  <div class="centered">
+    <div class="card">
+      <div class="card-title mb-2">Welcome back</div>
+      <div class="card-body">You started this assessment and left off at <strong>Question 4 of 10</strong>.</div>
+      <div class="progress-bar mb-1"><div class="progress-fill" style="width:40%;"></div></div>
+      <div class="text-xs text-muted mb-4">40% complete</div>
+      <button class="btn btn-primary btn-full mb-2" onclick="go('screen-time-warning')">Continue assessment</button>
+      <button class="btn btn-outline btn-full">Start over</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  SCREEN: time-warning (participant)                           -->
+<!-- ============================================================ -->
+<div id="screen-time-warning" class="screen">
+  <div style="min-height:100vh;background:var(--muted-bg);display:flex;flex-direction:column;">
+    <div style="background:var(--bg);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-weight:600;font-size:15px;">Sales Team DISC Assessment</div>
+      <div style="font-size:14px;font-weight:600;color:var(--amber);">⏱ 01:58 remaining</div>
+    </div>
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:24px;">
+      <div style="max-width:600px;width:100%;">
+        <div class="banner banner-amber mb-4">⚠ 2 minutes remaining — your answers are saved automatically.</div>
+        <div class="progress-bar mb-1"><div class="progress-fill" style="width:80%;"></div></div>
+        <div class="progress-meta"><span>Question 8 of 10</span><span>2 min left</span></div>
+        <div style="font-size:18px;font-weight:600;margin-bottom:20px;line-height:1.5;">When a project changes direction at the last minute, you typically…</div>
+        <div class="q-option">Immediately take control and re-plan the approach</div>
+        <div class="q-option selected">Rally the team with energy and keep morale high</div>
+        <div class="q-option">Stay calm and adapt steadily to the new direction</div>
+        <div class="q-option">Review what went wrong and document lessons learned</div>
+        <div class="flex justify-between mt-4">
+          <button class="btn btn-outline">← Previous</button>
+          <button class="btn btn-primary" onclick="go('screen-time-expired')">Next →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  SCREEN: time-expired (participant)                           -->
+<!-- ============================================================ -->
+<div id="screen-time-expired" class="screen">
+  <div class="centered">
+    <div class="card text-center">
+      <div class="icon-wrap"><div class="icon-circle icon-amber">⏱</div></div>
+      <div class="card-title">Time's up</div>
+      <div class="card-body">Your answers have been automatically submitted. Thank you for completing the assessment.<br><br><span class="text-xs text-muted">You answered 9 of 10 questions.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  SCREEN: mobile-question (participant, narrow frame)          -->
+<!-- ============================================================ -->
+<div id="screen-mobile-question" class="screen" style="background:#f0f0f0;min-height:100vh;display:none;align-items:flex-start;justify-content:center;padding:24px 0;">
+  <div class="mobile-frame" style="box-shadow:0 8px 32px rgba(0,0,0,.18);border-radius:20px;overflow:hidden;border:1px solid var(--border);">
+    <div style="background:var(--bg);padding:14px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-weight:700;font-size:14px;color:var(--primary);">BehaviorAssess</div>
+      <div style="font-size:12px;font-weight:600;color:var(--amber);">⏱ 08:24</div>
+    </div>
+    <div style="padding:20px 16px;">
+      <div class="progress-bar mb-1"><div class="progress-fill" style="width:30%;"></div></div>
+      <div class="progress-meta"><span>Question 3 of 10</span></div>
+      <div style="font-size:16px;font-weight:600;line-height:1.5;margin-bottom:20px;">When working with others on a project, you typically…</div>
+      <div class="q-option mb-2" style="text-align:left;">Take the lead and delegate tasks clearly</div>
+      <div class="q-option selected mb-2" style="text-align:left;">Energize the group and keep everyone motivated</div>
+      <div class="q-option mb-2" style="text-align:left;">Support others and ensure everyone is heard</div>
+      <div class="q-option mb-4" style="text-align:left;">Plan carefully and track progress systematically</div>
+      <div class="flex gap-2">
+        <button class="btn btn-outline" style="flex:1;justify-content:center;">← Prev</button>
+        <button class="btn btn-primary" style="flex:1;justify-content:center;">Next →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  QUICK NAV                                                    -->
+<!-- ============================================================ -->
+<div id="qnav">
+  <button class="qnav-part1" onclick="openPart1()">← Part 1</button>
+  <div class="qnav-section"><span class="qnav-label">Auth</span>
+    <button class="qnav-btn" onclick="go('screen-email-verify')">Verify Email</button>
+    <button class="qnav-btn" onclick="go('screen-reset-request')">Reset Request</button>
+    <button class="qnav-btn" onclick="go('screen-reset-confirm')">Reset Confirm</button>
+    <button class="qnav-btn" onclick="go('screen-login-error')">Login Error</button>
+  </div>
+  <div class="qnav-section"><span class="qnav-label">Mgmt</span>
+    <button class="qnav-btn" onclick="go('screen-edit-warning')">Edit Warning</button>
+    <button class="qnav-btn" onclick="go('screen-delete-confirm')">Delete Confirm</button>
+    <button class="qnav-btn" onclick="go('screen-settings')">Settings</button>
+  </div>
+  <div class="qnav-section"><span class="qnav-label">Questions</span>
+    <button class="qnav-btn" onclick="go('screen-add-question-modal')">Add Question</button>
+    <button class="qnav-btn" onclick="go('screen-ai-loading')">AI Loading</button>
+    <button class="qnav-btn" onclick="go('screen-ai-error')">AI Error</button>
+    <button class="qnav-btn" onclick="go('screen-ai-edit-question')">AI Edit Q</button>
+  </div>
+  <div class="qnav-section"><span class="qnav-label">Invitations</span>
+    <button class="qnav-btn" onclick="go('screen-csv-upload')">CSV Upload</button>
+    <button class="qnav-btn" onclick="go('screen-invalid-emails')">Invalid Emails</button>
+    <button class="qnav-btn" onclick="go('screen-duplicate-warning')">Duplicate</button>
+    <button class="qnav-btn" onclick="go('screen-invitations-sent')">Sent ✓</button>
+    <button class="qnav-btn" onclick="go('screen-resend-modal')">Resend</button>
+  </div>
+  <div class="qnav-section"><span class="qnav-label">Analytics</span>
+    <button class="qnav-btn" onclick="go('screen-analytics-empty')">Empty</button>
+    <button class="qnav-btn" onclick="go('screen-analytics-all')">All Statuses</button>
+  </div>
+  <div class="qnav-section"><span class="qnav-label">Participant</span>
+    <button class="qnav-btn" onclick="go('screen-link-expired')">Expired Link</button>
+    <button class="qnav-btn" onclick="go('screen-already-submitted')">Already Done</button>
+    <button class="qnav-btn" onclick="go('screen-resume-prompt')">Resume</button>
+    <button class="qnav-btn" onclick="go('screen-time-warning')">Time Warning</button>
+    <button class="qnav-btn" onclick="go('screen-time-expired')">Time Expired</button>
+    <button class="qnav-btn" onclick="go('screen-mobile-question')">Mobile View</button>
+    <button class="qnav-btn" onclick="go('screen-result-email')">Result Email</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SCREEN: Result Email (FR-28, FR-29 — §4.7)
+     Participant receives this email after session submission
+     when result email is enabled on the assessment.
+══════════════════════════════════════════════════════ -->
+<div id="screen-result-email" class="screen" style="min-height:100vh;background:#f1f5f9;padding:32px 16px;display:none;">
+
+  <!-- Email client chrome -->
+  <div style="max-width:640px;margin:0 auto;">
+
+    <!-- Back label (simulates email client) -->
+    <div style="font-size:13px;color:#64748b;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+      <span style="font-size:16px;">←</span> Inbox
+    </div>
+
+    <!-- Email card -->
+    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);">
+
+      <!-- Email header -->
+      <div style="padding:24px 28px 20px;border-bottom:1px solid #f1f5f9;">
+        <div style="font-size:20px;font-weight:700;color:#0f172a;margin-bottom:12px;">Your DISC Behavioral Profile</div>
+        <div style="display:flex;flex-direction:column;gap:4px;font-size:13px;color:#64748b;">
+          <div><span style="font-weight:500;color:#374151;width:60px;display:inline-block;">From</span> BehaviorAssess &lt;results@behaviorassess.app&gt;</div>
+          <div><span style="font-weight:500;color:#374151;width:60px;display:inline-block;">To</span> james@acme.com</div>
+          <div><span style="font-weight:500;color:#374151;width:60px;display:inline-block;">Date</span> 6 Sep 2026, 14:32</div>
+        </div>
+      </div>
+
+      <!-- Email body -->
+      <div style="padding:28px;">
+
+        <!-- Greeting -->
+        <p style="font-size:14px;color:#374151;line-height:1.6;margin-bottom:20px;">
+          Hi James,<br><br>
+          You've completed <strong>Sales Role Behavioral Assessment</strong>. Below is your full DISC Behavioral Profile, generated from your responses.
+        </p>
+
+        <!-- Assessment meta -->
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px 16px;margin-bottom:24px;display:flex;gap:24px;flex-wrap:wrap;">
+          <div>
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#94a3b8;margin-bottom:2px;">Assessment</div>
+            <div style="font-size:13px;font-weight:500;color:#0f172a;">Sales Role Behavioral Assessment</div>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#94a3b8;margin-bottom:2px;">Framework</div>
+            <div style="font-size:13px;font-weight:500;color:#0f172a;">DISC</div>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#94a3b8;margin-bottom:2px;">Completed</div>
+            <div style="font-size:13px;font-weight:500;color:#0f172a;">6 Sep 2026, 14:31</div>
+          </div>
+        </div>
+
+        <!-- Section heading -->
+        <div style="font-size:15px;font-weight:700;color:#0f172a;margin-bottom:16px;">Your Behavioral Profile</div>
+
+        <!-- Trait blocks — FR-29: Trait name, Score, Score Band, interpretive text -->
+
+        <!-- D — Dominance: Low -->
+        <div style="border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <span style="background:#fee2e2;color:#b91c1c;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">D</span>
+            <span style="font-size:14px;font-weight:600;color:#0f172a;">Dominance</span>
+            <span style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+              <span style="font-size:13px;font-weight:600;color:#0f172a;">20</span>
+              <span style="font-size:11px;background:#f1f5f9;color:#475569;padding:2px 8px;border-radius:20px;font-weight:500;">Low</span>
+            </span>
+          </div>
+          <!-- Score bar -->
+          <div style="height:5px;background:#f1f5f9;border-radius:3px;margin-bottom:10px;">
+            <div style="height:5px;width:20%;background:#ef4444;border-radius:3px;"></div>
+          </div>
+          <p style="font-size:13px;color:#475569;line-height:1.6;">Tends to prefer collaborative decisions over unilateral ones. Comfortable letting others lead; focuses energy on contributing rather than directing. Works best when able to think through decisions before committing.</p>
+        </div>
+
+        <!-- I — Influence: Low -->
+        <div style="border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <span style="background:#fef9c3;color:#a16207;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">I</span>
+            <span style="font-size:14px;font-weight:600;color:#0f172a;">Influence</span>
+            <span style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+              <span style="font-size:13px;font-weight:600;color:#0f172a;">0</span>
+              <span style="font-size:11px;background:#f1f5f9;color:#475569;padding:2px 8px;border-radius:20px;font-weight:500;">Low</span>
+            </span>
+          </div>
+          <div style="height:5px;background:#f1f5f9;border-radius:3px;margin-bottom:10px;">
+            <div style="height:5px;width:0%;background:#eab308;border-radius:3px;"></div>
+          </div>
+          <p style="font-size:13px;color:#475569;line-height:1.6;">Works best in structured, focused environments. Less driven by social recognition; prefers depth of work over breadth of relationships. Engages collaboratively when needed but does not seek external energy.</p>
+        </div>
+
+        <!-- S — Steadiness: Low -->
+        <div style="border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <span style="background:#dcfce7;color:#15803d;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">S</span>
+            <span style="font-size:14px;font-weight:600;color:#0f172a;">Steadiness</span>
+            <span style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+              <span style="font-size:13px;font-weight:600;color:#0f172a;">20</span>
+              <span style="font-size:11px;background:#f1f5f9;color:#475569;padding:2px 8px;border-radius:20px;font-weight:500;">Low</span>
+            </span>
+          </div>
+          <div style="height:5px;background:#f1f5f9;border-radius:3px;margin-bottom:10px;">
+            <div style="height:5px;width:20%;background:#22c55e;border-radius:3px;"></div>
+          </div>
+          <p style="font-size:13px;color:#475569;line-height:1.6;">Adapts well to change and variety. Less attached to routine; comfortable shifting priorities when the situation demands it. May move on quickly once a task is complete rather than consolidating steadily.</p>
+        </div>
+
+        <!-- C — Conscientiousness: Moderate -->
+        <div style="border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin-bottom:24px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <span style="background:#dbeafe;color:#1d4ed8;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">C</span>
+            <span style="font-size:14px;font-weight:600;color:#0f172a;">Conscientiousness</span>
+            <span style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+              <span style="font-size:13px;font-weight:600;color:#0f172a;">60</span>
+              <span style="font-size:11px;background:#dbeafe;color:#1d4ed8;padding:2px 8px;border-radius:20px;font-weight:600;">Moderate</span>
+            </span>
+          </div>
+          <div style="height:5px;background:#f1f5f9;border-radius:3px;margin-bottom:10px;">
+            <div style="height:5px;width:60%;background:#3b82f6;border-radius:3px;"></div>
+          </div>
+          <p style="font-size:13px;color:#475569;line-height:1.6;">Detail-oriented and methodical. Balances analytical rigor with practical execution — thorough without being paralysed by perfectivity. Brings careful thinking to decisions while still moving forward.</p>
+        </div>
+
+        <!-- Dominant trait callout -->
+        <div style="background:#eef2ff;border-left:3px solid #4F46E5;border-radius:0 6px 6px 0;padding:12px 16px;margin-bottom:24px;">
+          <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#4F46E5;margin-bottom:3px;">Dominant Trait</div>
+          <div style="font-size:13px;color:#312e81;line-height:1.5;">Your highest-scoring trait is <strong>Conscientiousness (C)</strong>. In a team context, this signals a structured, quality-conscious working style with a preference for accuracy over speed.</div>
+        </div>
+
+        <!-- Footer note -->
+        <div style="border-top:1px solid #f1f5f9;padding-top:16px;">
+          <p style="font-size:12px;color:#94a3b8;line-height:1.6;">This profile was generated automatically from your assessment responses. Results are for informational purposes only. If you have questions about this assessment, contact the person or team who sent you the invitation link.</p>
+        </div>
+
+      </div><!-- /email body -->
+    </div><!-- /email card -->
+
+    <!-- Screen label -->
+    <div style="text-align:center;margin-top:14px;font-size:12px;color:#94a3b8;">
+      FR-28 · FR-29 · §4.7 Result Email — received by participant after session submission (result email enabled)
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function go(id) {
+    // Hide all
+    document.querySelectorAll('.screen, .screen-app').forEach(el => {
+      el.classList.remove('active');
+      if (el.style.display === 'flex' || el.style.display === 'block') el.style.display = '';
+    });
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (el.classList.contains('screen-app')) {
+      el.classList.add('active');
+    } else if (id === 'screen-mobile-question') {
+      el.style.display = 'flex';
+    } else if (id === 'screen-result-email') {
+      el.style.display = 'block';
+    } else {
+      el.classList.add('active');
+    }
+    window.scrollTo(0, 0);
+  }
+
+  function selectRadio(picked, other) {
+    document.getElementById(picked).classList.add('selected');
+    document.getElementById(other).classList.remove('selected');
+  }
+
+  function openPart1() {
+    window.location.href = 'prototype.html';
+  }
+
+  // Init
+  go('screen-email-verify');
+</script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+# Build context is ./backend and the Dockerfile does `COPY . .`, so anything
+# left here is baked into the image. .gitignore does NOT apply to Docker builds.
+
+# Virtualenv — Windows-native binaries, breaks the Linux image and adds ~250MB
+venv/
+.venv/
+env/
+ENV/
+
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+service-account*.json
+client_secret*.json
+
+# Local database
+*.sqlite3
+*.sqlite3-journal
+db.sqlite3
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Collected static is regenerated in the image
+staticfiles/
+mediafiles/
+
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.tox/
+
+*.log
+celerybeat-schedule
+celerybeat.pid
+
+.git/
+.gitignore
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,125 @@
+# ---------------------------------------------------------------------------
+# Secrets — never commit real credentials.
+# Google OAuth client IDs, Gmail app passwords and AI provider API keys all
+# live in .env. Only the *.example templates belong in version control.
+# ---------------------------------------------------------------------------
+.env
+.env.*
+*.env
+!.env.example
+!.env.*.example
+
+*.pem
+*.key
+*.p12
+credentials.json
+service-account*.json
+client_secret*.json
+
+# ---------------------------------------------------------------------------
+# Python / Django
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtualenvs
+venv/
+.venv/
+env/
+ENV/
+
+# Local database — SQLite is the no-Docker local dev path
+*.sqlite3
+*.sqlite3-journal
+*.db
+
+# Django collected static and user uploads
+staticfiles/
+mediafiles/
+media/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.tox/
+.nox/
+.mypy_cache/
+.ruff_cache/
+.dmypy.json
+
+# ---------------------------------------------------------------------------
+# Node / frontend
+# ---------------------------------------------------------------------------
+node_modules/
+frontend/dist/
+.vite/
+*.tsbuildinfo
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+
+.eslintcache
+
+# ---------------------------------------------------------------------------
+# Logs & runtime
+# ---------------------------------------------------------------------------
+*.log
+logs/
+pids/
+*.pid
+*.seed
+
+# ---------------------------------------------------------------------------
+# Tooling installs — reproducible from skills-lock.json / BMAD config,
+# so the installed bundles themselves stay out of the repo.
+# ---------------------------------------------------------------------------
+.claude/skills/
+.claude/settings.local.json
+.agents/skills/
+_bmad/config.user.toml
+
+# ---------------------------------------------------------------------------
+# Editors & OS
+# ---------------------------------------------------------------------------
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+desktop.ini
+$RECYCLE.BIN/

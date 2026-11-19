@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Direction: Clinical & Precise</title>
+<style>
+  /* === DIRECTION: CLINICAL & PRECISE ===
+     Primary background:  #FFFFFF
+     Surface:             #F8F9FA
+     Border:              #E5E7EB
+     Text primary:        #111827
+     Text secondary:      #6B7280
+     Accent (blue):       #2563EB
+     Badge draft bg:      #F3F4F6
+     Badge draft text:    #374151
+     Badge published bg:  #EFF6FF
+     Badge published txt: #1D4ED8
+     Success green:       #16A34A
+  */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #E8EAED; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 40px 20px; color: #111827; }
+  .rationale { max-width: 900px; margin: 0 auto 24px; background: #fff; border: 1px solid #E5E7EB; border-radius: 6px; padding: 16px 20px; font-size: 13px; color: #6B7280; line-height: 1.6; }
+  .rationale strong { color: #111827; }
+  .browser { max-width: 900px; margin: 0 auto; background: #D1D5DB; border-radius: 10px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.18); }
+  .browser-bar { background: #E5E7EB; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .dots { display: flex; gap: 6px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-r { background: #FC4F4F; }
+  .dot-y { background: #FDBA74; }
+  .dot-g { background: #4ADE80; }
+  .url-bar { flex: 1; background: #fff; border: 1px solid #D1D5DB; border-radius: 4px; padding: 4px 10px; font-size: 12px; color: #6B7280; }
+  .app { background: #fff; display: flex; min-height: 560px; }
+  /* Sidebar */
+  .sidebar { width: 220px; background: #F8F9FA; border-right: 1px solid #E5E7EB; padding: 20px 0; flex-shrink: 0; }
+  .sidebar-logo { padding: 0 20px 20px; font-size: 13px; font-weight: 600; color: #111827; letter-spacing: -0.01em; border-bottom: 1px solid #E5E7EB; margin-bottom: 8px; }
+  .sidebar-logo span { color: #2563EB; }
+  .nav-item { padding: 7px 20px; font-size: 13px; color: #6B7280; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+  .nav-item.active { color: #111827; background: #EFF6FF; font-weight: 500; border-right: 2px solid #2563EB; }
+  .nav-icon { width: 14px; height: 14px; background: currentColor; border-radius: 2px; opacity: 0.4; }
+  /* Main */
+  .main { flex: 1; padding: 28px 32px; }
+  .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+  .page-title { font-size: 16px; font-weight: 600; color: #111827; letter-spacing: -0.01em; }
+  .btn-primary { background: #2563EB; color: #fff; border: none; padding: 7px 14px; border-radius: 5px; font-size: 13px; font-weight: 500; cursor: pointer; }
+  /* Table */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th { text-align: left; padding: 8px 12px; font-size: 11px; font-weight: 500; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #E5E7EB; }
+  tbody tr { border-bottom: 1px solid #F3F4F6; }
+  tbody tr:hover { background: #F9FAFB; }
+  tbody td { padding: 11px 12px; color: #374151; }
+  .name { font-weight: 500; color: #111827; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 500; }
+  .badge-draft { background: #F3F4F6; color: #374151; }
+  .badge-published { background: #EFF6FF; color: #1D4ED8; }
+  .completion { color: #16A34A; font-weight: 500; }
+  .actions { color: #9CA3AF; font-size: 12px; }
+  /* Empty state */
+  .empty-state { margin-top: 32px; border: 1px dashed #E5E7EB; border-radius: 6px; padding: 40px; text-align: center; }
+  .empty-title { font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 6px; }
+  .empty-sub { font-size: 13px; color: #9CA3AF; margin-bottom: 20px; }
+</style>
+</head>
+<body>
+<div class="rationale">
+  <strong>Direction 1 — Clinical &amp; Precise.</strong> White-dominant, fine type, subtle structure. Every element earns its place; nothing decorates without informing. Inspired by Linear and Notion — this direction signals precision and trust, right for HR professionals who equate visual discipline with product reliability. The sidebar provides permanent wayfinding; the table layout scales to dozens of assessments without clutter.
+</div>
+
+<div class="browser">
+  <div class="browser-bar">
+    <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+    <div class="url-bar">app.behavioralassess.io/assessments</div>
+  </div>
+  <div class="app">
+    <div class="sidebar">
+      <div class="sidebar-logo">Assess<span>IQ</span></div>
+      <div class="nav-item active"><div class="nav-icon"></div>Assessments</div>
+      <div class="nav-item"><div class="nav-icon"></div>Analytics</div>
+      <div class="nav-item"><div class="nav-icon"></div>Settings</div>
+    </div>
+    <div class="main">
+      <div class="page-header">
+        <div class="page-title">Assessments</div>
+        <button class="btn-primary">+ New Assessment</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Framework</th>
+            <th>Invited</th>
+            <th>Completion</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="name">Sales Role — Assertiveness &amp; Teamwork</td>
+            <td><span class="badge badge-published">Published</span></td>
+            <td>DISC</td>
+            <td>5</td>
+            <td class="completion">80%</td>
+            <td class="actions">···</td>
+          </tr>
+          <tr>
+            <td class="name">Q3 Engineering Team Profile</td>
+            <td><span class="badge badge-published">Published</span></td>
+            <td>Big Five</td>
+            <td>12</td>
+            <td class="completion">100%</td>
+            <td class="actions">···</td>
+          </tr>
+          <tr>
+            <td class="name">Culture Fit — Customer Success</td>
+            <td><span class="badge badge-draft">Draft</span></td>
+            <td>DISC</td>
+            <td>—</td>
+            <td style="color:#9CA3AF;">—</td>
+            <td class="actions">···</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Empty state variant -->
+      <div class="empty-state">
+        <div class="empty-title">No assessments yet</div>
+        <div class="empty-sub">Create your first assessment to start inviting participants.</div>
+        <button class="btn-primary">+ Create your first Assessment</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

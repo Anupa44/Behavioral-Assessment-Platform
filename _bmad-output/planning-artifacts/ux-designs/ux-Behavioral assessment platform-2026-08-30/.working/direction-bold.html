@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Direction: Bold & Data-Forward</title>
+<style>
+  /* === DIRECTION: BOLD & DATA-FORWARD ===
+     Background:          #0F172A
+     Surface card:        #1E293B
+     Border:              #334155
+     Text primary:        #F1F5F9
+     Text secondary:      #94A3B8
+     Accent (violet):     #7C3AED
+     Accent light:        #A78BFA
+     D badge:             #DC2626  (Dominance — red)
+     I badge:             #D97706  (Influence — amber)
+     S badge:             #16A34A  (Steadiness — green)
+     C badge:             #2563EB  (Conscientiousness — blue)
+     Chart bg:            #1E293B
+     Stat highlight:      #7C3AED
+  */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0A0F1E; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 40px 20px; color: #F1F5F9; }
+  .rationale { max-width: 900px; margin: 0 auto 24px; background: #1E293B; border: 1px solid #334155; border-radius: 8px; padding: 16px 20px; font-size: 13px; color: #94A3B8; line-height: 1.6; }
+  .rationale strong { color: #F1F5F9; }
+  .browser { max-width: 900px; margin: 0 auto; background: #1A2235; border-radius: 10px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.5); }
+  .browser-bar { background: #1E293B; padding: 10px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #334155; }
+  .dots { display: flex; gap: 6px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-r { background: #FC4F4F; }
+  .dot-y { background: #FDBA74; }
+  .dot-g { background: #4ADE80; }
+  .url-bar { flex: 1; background: #0F172A; border: 1px solid #334155; border-radius: 4px; padding: 4px 10px; font-size: 12px; color: #64748B; }
+  .app { background: #0F172A; display: flex; min-height: 560px; }
+  /* Sidebar */
+  .sidebar { width: 200px; background: #0F172A; border-right: 1px solid #1E293B; padding: 20px 0; flex-shrink: 0; }
+  .logo { padding: 0 18px 20px; font-size: 13px; font-weight: 700; color: #F1F5F9; letter-spacing: -0.01em; border-bottom: 1px solid #1E293B; margin-bottom: 8px; }
+  .logo span { color: #7C3AED; }
+  .nav-item { padding: 8px 18px; font-size: 12px; color: #64748B; cursor: pointer; }
+  .nav-item.active { color: #F1F5F9; background: #1E293B; border-left: 2px solid #7C3AED; font-weight: 500; }
+  /* Main */
+  .main { flex: 1; padding: 24px 28px; }
+  .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .page-title { font-size: 15px; font-weight: 600; color: #F1F5F9; }
+  .page-sub { font-size: 12px; color: #64748B; margin-top: 2px; }
+  .btn-primary { background: #7C3AED; color: #fff; border: none; padding: 7px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; }
+  /* Stats row */
+  .stats { display: flex; gap: 12px; margin-bottom: 20px; }
+  .stat-card { background: #1E293B; border: 1px solid #334155; border-radius: 8px; padding: 14px 18px; flex: 1; }
+  .stat-value { font-size: 24px; font-weight: 700; color: #A78BFA; letter-spacing: -0.02em; }
+  .stat-label { font-size: 11px; color: #64748B; margin-top: 2px; }
+  /* Content row */
+  .content-row { display: flex; gap: 16px; }
+  /* Chart */
+  .chart-card { background: #1E293B; border: 1px solid #334155; border-radius: 8px; padding: 18px; width: 200px; flex-shrink: 0; }
+  .chart-title { font-size: 11px; font-weight: 600; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 16px; }
+  .donut-wrap { display: flex; justify-content: center; margin-bottom: 14px; }
+  svg.donut { width: 100px; height: 100px; }
+  .legend { display: flex; flex-direction: column; gap: 6px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #94A3B8; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  /* Participant table */
+  .table-card { background: #1E293B; border: 1px solid #334155; border-radius: 8px; padding: 18px; flex: 1; }
+  .table-title { font-size: 11px; font-weight: 600; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  thead th { text-align: left; padding: 6px 8px; font-size: 10px; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #334155; }
+  tbody tr { border-bottom: 1px solid #1E293B; }
+  tbody td { padding: 9px 8px; color: #CBD5E1; }
+  .p-name { color: #F1F5F9; font-weight: 500; }
+  .badge { display: inline-block; padding: 2px 7px; border-radius: 3px; font-size: 10px; font-weight: 700; }
+  .badge-d { background: rgba(220,38,38,0.15); color: #FCA5A5; }
+  .badge-i { background: rgba(217,119,6,0.15); color: #FCD34D; }
+  .badge-s { background: rgba(22,163,74,0.15); color: #86EFAC; }
+  .badge-c { background: rgba(37,99,235,0.15); color: #93C5FD; }
+  .badge-comp { background: rgba(124,58,237,0.15); color: #A78BFA; font-size:10px; font-weight:500; padding: 2px 8px; border-radius: 99px; }
+</style>
+</head>
+<body>
+<div class="rationale">
+  <strong>Direction 3 — Bold &amp; Data-Forward.</strong> Dark canvas, violet accent, and prominent data visualization put the behavioral insight front and center. This direction is built for the Maker who wants to feel the power of the analytics — trait distributions, completion rates, and participant profiles are the hero. Inspired by Amplitude and Mixpanel, it signals a serious analytics product rather than a survey tool.
+</div>
+
+<div class="browser">
+  <div class="browser-bar">
+    <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+    <div class="url-bar">app.assessiq.io/assessments/sales-role/analytics</div>
+  </div>
+  <div class="app">
+    <div class="sidebar">
+      <div class="logo">Assess<span>IQ</span></div>
+      <div class="nav-item">Assessments</div>
+      <div class="nav-item active">Analytics</div>
+      <div class="nav-item">Settings</div>
+    </div>
+    <div class="main">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Sales Role — Assertiveness &amp; Teamwork</div>
+          <div class="page-sub">DISC Framework · 5 invited · Last activity 2 days ago</div>
+        </div>
+        <button class="btn-primary">+ New Batch</button>
+      </div>
+
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-value">4/5</div>
+          <div class="stat-label">Completed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">80%</div>
+          <div class="stat-label">Completion Rate</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">D</div>
+          <div class="stat-label">Dominant Trait</div>
+        </div>
+      </div>
+
+      <div class="content-row">
+        <div class="chart-card">
+          <div class="chart-title">Trait Distribution</div>
+          <div class="donut-wrap">
+            <svg class="donut" viewBox="0 0 36 36">
+              <!-- D: 40% red -->
+              <circle cx="18" cy="18" r="14" fill="none" stroke="#DC2626" stroke-width="5" stroke-dasharray="35 65" stroke-dashoffset="25" />
+              <!-- I: 25% amber -->
+              <circle cx="18" cy="18" r="14" fill="none" stroke="#D97706" stroke-width="5" stroke-dasharray="22 78" stroke-dashoffset="-10" />
+              <!-- S: 20% green -->
+              <circle cx="18" cy="18" r="14" fill="none" stroke="#16A34A" stroke-width="5" stroke-dasharray="18 82" stroke-dashoffset="-32" />
+              <!-- C: 15% blue -->
+              <circle cx="18" cy="18" r="14" fill="none" stroke="#2563EB" stroke-width="5" stroke-dasharray="13 87" stroke-dashoffset="-50" />
+              <circle cx="18" cy="18" r="10" fill="#1E293B" />
+            </svg>
+          </div>
+          <div class="legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#DC2626"></div>D — 40%</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#D97706"></div>I — 25%</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#16A34A"></div>S — 20%</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#2563EB"></div>C — 15%</div>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-title">Participants</div>
+          <table>
+            <thead>
+              <tr><th>Name / Email</th><th>Dominant</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="p-name">james.o@example.com</td>
+                <td><span class="badge badge-d">D</span></td>
+                <td><span class="badge-comp">Completed</span></td>
+              </tr>
+              <tr>
+                <td class="p-name">priya.k@example.com</td>
+                <td><span class="badge badge-i">I</span></td>
+                <td><span class="badge-comp">Completed</span></td>
+              </tr>
+              <tr>
+                <td class="p-name">marcus.t@example.com</td>
+                <td><span class="badge badge-d">D</span></td>
+                <td><span class="badge-comp">Completed</span></td>
+              </tr>
+              <tr>
+                <td class="p-name">anna.w@example.com</td>
+                <td><span class="badge badge-s">S</span></td>
+                <td><span class="badge-comp">Completed</span></td>
+              </tr>
+              <tr>
+                <td class="p-name">leo.b@example.com</td>
+                <td style="color:#475569;">—</td>
+                <td><span style="font-size:10px;color:#D97706;">Invited</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

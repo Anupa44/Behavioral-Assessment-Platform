@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Behavioral Assessment Platform — Prototype</title>
+<style>
+  /* === TOKENS === */
+  :root {
+    --primary: #4F46E5;
+    --primary-hover: #4338CA;
+    --primary-light: #EEF2FF;
+    --foreground: #09090B;
+    --muted: #71717A;
+    --muted-fg: #A1A1AA;
+    --border: #E4E4E7;
+    --input-border: #D4D4D8;
+    --bg: #FFFFFF;
+    --card: #FFFFFF;
+    --sidebar-bg: #F4F4F5;
+    --radius: 6px;
+    --radius-lg: 10px;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow: 0 1px 3px rgba(0,0,0,0.10), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-lg: 0 10px 15px rgba(0,0,0,0.08), 0 4px 6px rgba(0,0,0,0.05);
+  }
+
+  /* === RESET === */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; color: var(--foreground); background: var(--bg); line-height: 1.5; }
+  a { color: var(--primary); text-decoration: none; cursor: pointer; }
+  a:hover { text-decoration: underline; }
+
+  /* === SCREENS === */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; }
+
+  /* === AUTH SCREENS === */
+  .auth-wrap { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #FAFAFA; width: 100%; }
+  .auth-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 40px; width: 100%; max-width: 400px; box-shadow: var(--shadow-lg); }
+  .auth-logo { display: flex; align-items: center; gap: 8px; margin-bottom: 28px; }
+  .auth-logo-mark { width: 32px; height: 32px; background: var(--primary); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 16px; }
+  .auth-logo-name { font-weight: 600; font-size: 15px; color: var(--foreground); }
+  .auth-title { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .auth-sub { color: var(--muted); font-size: 13px; margin-bottom: 28px; }
+  .form-group { margin-bottom: 16px; }
+  label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: var(--foreground); }
+  input[type="text"], input[type="email"], input[type="password"], textarea, select {
+    width: 100%; padding: 8px 12px; border: 1px solid var(--input-border); border-radius: var(--radius);
+    font-size: 14px; font-family: inherit; outline: none; transition: border-color 0.15s;
+    background: white; color: var(--foreground);
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79,70,229,0.08); }
+  .auth-footer { text-align: center; margin-top: 20px; font-size: 13px; color: var(--muted); }
+
+  /* === BUTTONS === */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 16px; border-radius: var(--radius); font-size: 14px; font-weight: 500; cursor: pointer; border: none; transition: all 0.15s; font-family: inherit; }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-primary:hover { background: var(--primary-hover); }
+  .btn-outline { background: white; color: var(--foreground); border: 1px solid var(--border); }
+  .btn-outline:hover { background: #F4F4F5; }
+  .btn-ghost { background: transparent; color: var(--muted); border: none; }
+  .btn-ghost:hover { background: #F4F4F5; color: var(--foreground); }
+  .btn-sm { padding: 5px 10px; font-size: 13px; }
+  .btn-full { width: 100%; }
+  .btn-danger { background: #EF4444; color: white; }
+  .btn-danger:hover { background: #DC2626; }
+
+  /* === APP LAYOUT === */
+  .app-layout { display: flex; width: 100%; min-height: 100vh; }
+  .sidebar { width: 220px; background: var(--sidebar-bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 16px 0; flex-shrink: 0; }
+  .sidebar-logo { display: flex; align-items: center; gap: 8px; padding: 4px 16px 20px; }
+  .sidebar-logo-mark { width: 28px; height: 28px; background: var(--primary); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 13px; }
+  .sidebar-logo-name { font-weight: 600; font-size: 14px; }
+  .sidebar-section { padding: 0 8px; flex: 1; }
+  .sidebar-label { font-size: 11px; font-weight: 600; color: var(--muted-fg); text-transform: uppercase; letter-spacing: 0.05em; padding: 0 8px; margin-bottom: 4px; margin-top: 12px; }
+  .sidebar-item { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: var(--radius); font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer; transition: all 0.15s; }
+  .sidebar-item:hover { background: #EBEBEC; color: var(--foreground); }
+  .sidebar-item.active { background: white; color: var(--primary); box-shadow: var(--shadow-sm); }
+  .sidebar-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .sidebar-footer { padding: 12px 16px; border-top: 1px solid var(--border); margin-top: auto; }
+  .sidebar-user { display: flex; align-items: center; gap: 8px; }
+  .avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+  .avatar-name { font-size: 13px; font-weight: 500; }
+
+  .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .topbar { height: 57px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0; background: white; }
+  .topbar-title { font-size: 15px; font-weight: 600; }
+  .page-content { flex: 1; padding: 28px 24px; overflow-y: auto; }
+
+  /* === CARDS & TABLE === */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+  .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .card-title { font-size: 15px; font-weight: 600; }
+  .card-body { padding: 20px; }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th { text-align: left; font-size: 12px; font-weight: 500; color: var(--muted); padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; cursor: pointer; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #FAFAFA; }
+  tbody td { padding: 12px 12px; font-size: 13px; }
+
+  /* === BADGES === */
+  .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; }
+  .badge-green { background: #DCFCE7; color: #16A34A; }
+  .badge-gray { background: #F4F4F5; color: #71717A; }
+  .badge-blue { background: #DBEAFE; color: #2563EB; }
+  .badge-amber { background: #FEF3C7; color: #D97706; }
+  .badge-indigo { background: var(--primary-light); color: var(--primary); }
+  .badge-red { background: #FEE2E2; color: #DC2626; }
+
+  /* === STAT CARDS === */
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+  .stat-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; }
+  .stat-label { font-size: 12px; color: var(--muted); font-weight: 500; margin-bottom: 6px; }
+  .stat-value { font-size: 28px; font-weight: 700; }
+  .stat-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  /* === FORMS === */
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-section { margin-bottom: 24px; }
+  .form-section-title { font-size: 13px; font-weight: 600; margin-bottom: 12px; color: var(--foreground); }
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .toggle-info { display: flex; flex-direction: column; gap: 2px; }
+  .toggle-label { font-size: 13px; font-weight: 500; }
+  .toggle-desc { font-size: 12px; color: var(--muted); }
+  .toggle { width: 36px; height: 20px; background: #D4D4D8; border-radius: 99px; cursor: pointer; position: relative; transition: background 0.2s; flex-shrink: 0; }
+  .toggle.on { background: var(--primary); }
+  .toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: white; border-radius: 50%; transition: transform 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+  .toggle.on::after { transform: translateX(16px); }
+
+  /* === TABS === */
+  .tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+  .tab { padding: 8px 16px; font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; }
+  .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* === QUESTION CARDS === */
+  .question-card { border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; margin-bottom: 12px; background: white; }
+  .question-text { font-size: 14px; font-weight: 500; margin-bottom: 12px; }
+  .option-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 6px; background: #FAFAFA; }
+  .option-text { flex: 1; font-size: 13px; color: var(--muted); }
+  .trait-badge { font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+  .trait-D { background: #EDE9FE; color: #7C3AED; }
+  .trait-I { background: #FEF3C7; color: #D97706; }
+  .trait-S { background: #DCFCE7; color: #16A34A; }
+  .trait-C { background: #DBEAFE; color: #2563EB; }
+
+  /* === AI STAGING === */
+  .staged-question { border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px; margin-bottom: 10px; background: white; }
+  .staged-question-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+  .staged-question-text { font-size: 13px; font-weight: 500; flex: 1; }
+  .staged-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .staged-options { display: flex; flex-direction: column; gap: 4px; }
+  .staged-option { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+
+  /* === PARTICIPANT SCREENS === */
+  .participant-wrap { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #FAFAFA; width: 100%; }
+  .participant-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 40px; width: 100%; max-width: 580px; box-shadow: var(--shadow-lg); }
+  .participant-logo { display: flex; align-items: center; gap: 8px; margin-bottom: 32px; }
+  .p-logo-mark { width: 28px; height: 28px; background: var(--primary); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 13px; }
+
+  /* === PROGRESS BAR === */
+  .progress-wrap { margin-bottom: 28px; }
+  .progress-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .progress-bar { height: 4px; background: #E4E4E7; border-radius: 99px; }
+  .progress-fill { height: 100%; background: var(--primary); border-radius: 99px; transition: width 0.3s; }
+
+  /* === MCQ OPTIONS === */
+  .mcq-option { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border: 2px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 10px; cursor: pointer; transition: all 0.15s; background: white; }
+  .mcq-option:hover { border-color: #C7D2FE; background: #F5F5FF; }
+  .mcq-option.selected { border-color: var(--primary); background: var(--primary-light); }
+  .mcq-radio { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; transition: all 0.15s; }
+  .mcq-option.selected .mcq-radio { border-color: var(--primary); background: var(--primary); }
+  .mcq-option.selected .mcq-radio::after { content: ''; width: 6px; height: 6px; background: white; border-radius: 50%; }
+  .mcq-text { font-size: 14px; }
+
+  /* === ANALYTICS === */
+  .trait-bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .trait-bar-label { width: 130px; font-size: 13px; font-weight: 500; color: var(--foreground); flex-shrink: 0; }
+  .trait-bar-track { flex: 1; height: 8px; background: #F4F4F5; border-radius: 99px; }
+  .trait-bar-fill { height: 100%; border-radius: 99px; }
+  .trait-bar-pct { width: 36px; font-size: 12px; font-weight: 600; color: var(--muted); text-align: right; }
+
+  /* === SIDE PANEL === */
+  .side-panel-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 100; }
+  .side-panel-overlay.open { display: block; }
+  .side-panel { position: fixed; top: 0; right: 0; bottom: 0; width: 400px; background: white; border-left: 1px solid var(--border); box-shadow: var(--shadow-lg); z-index: 101; transform: translateX(100%); transition: transform 0.25s ease; overflow-y: auto; }
+  .side-panel.open { transform: translateX(0); }
+  .side-panel-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: white; }
+  .side-panel-body { padding: 20px; }
+  .profile-trait { margin-bottom: 20px; }
+  .profile-trait-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .profile-trait-name { font-size: 13px; font-weight: 600; }
+  .profile-trait-score { font-size: 13px; font-weight: 700; color: var(--primary); }
+  .profile-trait-bar { height: 6px; background: #F4F4F5; border-radius: 99px; margin-bottom: 8px; }
+  .profile-trait-fill { height: 100%; border-radius: 99px; background: var(--primary); }
+  .profile-trait-desc { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+  /* === STEP INDICATOR === */
+  .steps { display: flex; align-items: center; gap: 0; margin-bottom: 28px; }
+  .step { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--muted); }
+  .step-num { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+  .step.active { color: var(--primary); }
+  .step.active .step-num { border-color: var(--primary); color: var(--primary); }
+  .step.done .step-num { background: var(--primary); border-color: var(--primary); color: white; }
+  .step.done { color: var(--foreground); }
+  .step-line { flex: 1; height: 1px; background: var(--border); max-width: 40px; margin: 0 8px; }
+
+  /* === MISC === */
+  .empty-state { text-align: center; padding: 48px 24px; color: var(--muted); }
+  .empty-icon { font-size: 32px; margin-bottom: 12px; }
+  .empty-title { font-size: 15px; font-weight: 600; color: var(--foreground); margin-bottom: 6px; }
+  .empty-desc { font-size: 13px; margin-bottom: 20px; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .page-title { font-size: 20px; font-weight: 700; }
+  .page-desc { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+  .text-muted { color: var(--muted); }
+  .text-sm { font-size: 12px; }
+  .mt-16 { margin-top: 16px; }
+  .mt-8 { margin-top: 8px; }
+  .mb-16 { margin-bottom: 16px; }
+  .flex { display: flex; }
+  .items-center { align-items: center; }
+  .gap-8 { gap: 8px; }
+  .gap-12 { gap: 12px; }
+  .justify-between { justify-content: space-between; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .success-icon { width: 64px; height: 64px; background: #DCFCE7; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; }
+  .upload-zone { border: 2px dashed var(--border); border-radius: var(--radius-lg); padding: 24px; text-align: center; color: var(--muted); font-size: 13px; cursor: pointer; transition: border-color 0.15s; margin-top: 10px; }
+  .upload-zone:hover { border-color: var(--primary); }
+  .info-box { background: #F0F9FF; border: 1px solid #BAE6FD; border-radius: var(--radius); padding: 12px; font-size: 12px; color: #0369A1; margin-bottom: 16px; }
+  .published-banner { background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: var(--radius-lg); padding: 16px 20px; display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+  .published-banner-icon { font-size: 20px; }
+  .published-banner-text { font-size: 13px; font-weight: 500; color: #15803D; }
+  textarea { resize: vertical; min-height: 80px; }
+
+  /* === GENERATING STATE === */
+  .generating { display: none; text-align: center; padding: 32px; color: var(--muted); }
+  .generating.show { display: block; }
+  .spinner { width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .ai-results { display: none; }
+  .ai-results.show { display: block; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 1: LOGIN
+     ═══════════════════════════════════════════ -->
+<div id="screen-login" class="screen active">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="auth-logo-mark">B</div>
+        <div class="auth-logo-name">BehaviorAssess</div>
+      </div>
+      <div class="auth-title">Welcome back</div>
+      <div class="auth-sub">Sign in to your maker account</div>
+      <div class="form-group">
+        <label>Email address</label>
+        <input type="email" value="sarah@acmecorp.com" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" value="••••••••" />
+      </div>
+      <div style="text-align:right; margin-bottom:20px;">
+        <a style="font-size:13px;">Forgot password?</a>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="go('screen-dashboard')">Sign in</button>
+      <div class="auth-footer">Don't have an account? <a onclick="go('screen-signup')">Sign up</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 2: SIGN UP
+     ═══════════════════════════════════════════ -->
+<div id="screen-signup" class="screen">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="auth-logo-mark">B</div>
+        <div class="auth-logo-name">BehaviorAssess</div>
+      </div>
+      <div class="auth-title">Create your account</div>
+      <div class="auth-sub">Start creating behavioral assessments in minutes</div>
+      <div class="form-group">
+        <label>Full name</label>
+        <input type="text" placeholder="Sarah Johnson" />
+      </div>
+      <div class="form-group">
+        <label>Work email</label>
+        <input type="email" placeholder="sarah@acmecorp.com" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" placeholder="Min. 8 characters" />
+      </div>
+      <button class="btn btn-primary btn-full" onclick="go('screen-dashboard')">Create account</button>
+      <div class="auth-footer">Already have an account? <a onclick="go('screen-login')">Sign in</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 3: DASHBOARD — ASSESSMENT LIST
+     ═══════════════════════════════════════════ -->
+<div id="screen-dashboard" class="screen">
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-mark">B</div>
+        <div class="sidebar-logo-name">BehaviorAssess</div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-item active" onclick="go('screen-dashboard')">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Assessments
+        </div>
+        <div class="sidebar-item" onclick="go('screen-settings')">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          Settings
+        </div>
+      </div>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="avatar">SJ</div>
+          <div class="avatar-name">Sarah Johnson</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main -->
+    <div class="main-content">
+      <div class="topbar">
+        <div class="topbar-title">Assessments</div>
+        <button class="btn btn-primary btn-sm" onclick="go('screen-create-step1')">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New Assessment
+        </button>
+      </div>
+      <div class="page-content">
+        <div class="card">
+          <table>
+            <thead>
+              <tr>
+                <th>Assessment</th>
+                <th>Framework</th>
+                <th>Status</th>
+                <th>Invited</th>
+                <th>Completed</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr onclick="go('screen-analytics')">
+                <td>
+                  <div style="font-weight:500;">Sales Team DISC Assessment</div>
+                  <div style="font-size:11px;color:var(--muted);margin-top:2px;">Created Aug 30, 2026</div>
+                </td>
+                <td><span class="badge badge-indigo">DISC</span></td>
+                <td><span class="badge badge-green">Published</span></td>
+                <td>5</td>
+                <td>
+                  <span style="font-weight:600;">4</span>
+                  <span style="color:var(--muted);font-size:12px;"> / 5</span>
+                </td>
+                <td>
+                  <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); go('screen-analytics')">View</button>
+                  <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); go('screen-send')">Send</button>
+                </td>
+              </tr>
+              <tr onclick="go('screen-create-step1')">
+                <td>
+                  <div style="font-weight:500;">Q3 Culture Fit</div>
+                  <div style="font-size:11px;color:var(--muted);margin-top:2px;">Created Sep 2, 2026</div>
+                </td>
+                <td><span class="badge badge-indigo">Big Five</span></td>
+                <td><span class="badge badge-gray">Draft</span></td>
+                <td>—</td>
+                <td>—</td>
+                <td>
+                  <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); go('screen-create-step1')">Edit</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 4: CREATE — STEP 1: SETUP
+     ═══════════════════════════════════════════ -->
+<div id="screen-create-step1" class="screen">
+  <div class="app-layout">
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-mark">B</div>
+        <div class="sidebar-logo-name">BehaviorAssess</div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-item" onclick="go('screen-dashboard')">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Assessments
+        </div>
+      </div>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="avatar">SJ</div>
+          <div class="avatar-name">Sarah Johnson</div>
+        </div>
+      </div>
+    </div>
+    <div class="main-content">
+      <div class="topbar">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button class="btn btn-ghost btn-sm" onclick="go('screen-dashboard')">← Back</button>
+          <div class="topbar-title">New Assessment</div>
+        </div>
+      </div>
+      <div class="page-content" style="max-width:680px;">
+        <div class="steps">
+          <div class="step active">
+            <div class="step-num">1</div>
+            Setup
+          </div>
+          <div class="step-line"></div>
+          <div class="step">
+            <div class="step-num">2</div>
+            Questions
+          </div>
+          <div class="step-line"></div>
+          <div class="step">
+            <div class="step-num">3</div>
+            Publish & Send
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Assessment Details</div>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <label>Title *</label>
+              <input type="text" value="Sales Team DISC Assessment" />
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <textarea>A DISC behavioral assessment for evaluating assertiveness, communication style, and teamwork in sales candidates.</textarea>
+            </div>
+            <div class="form-group">
+              <label>Behavioral Framework *</label>
+              <select>
+                <option value="disc" selected>DISC</option>
+                <option value="big5">Big Five</option>
+              </select>
+              <div style="font-size:12px;color:var(--muted);margin-top:4px;">Determines how questions and results are scored and mapped.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card mt-16">
+          <div class="card-header"><div class="card-title">Configuration</div></div>
+          <div class="card-body" style="padding-top:0;">
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-label">Send result email to participants</div>
+                <div class="toggle-desc">Participants receive their full Behavioral Profile by email after completing the assessment.</div>
+              </div>
+              <div class="toggle" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="toggle-row" style="border-bottom:none;">
+              <div class="toggle-info">
+                <div class="toggle-label">Link expiry</div>
+                <div class="toggle-desc">How long participant links remain valid after sending.</div>
+              </div>
+              <select style="width:120px;">
+                <option>7 days</option>
+                <option>14 days</option>
+                <option>30 days</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;margin-top:20px;">
+          <button class="btn btn-primary" onclick="go('screen-create-step2')">Next: Add Questions →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 5: CREATE — STEP 2: QUESTIONS
+     ═══════════════════════════════════════════ -->
+<div id="screen-create-step2" class="screen">
+  <div class="app-layout">
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-mark">B</div>
+        <div class="sidebar-logo-name">BehaviorAssess</div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-item" onclick="go('screen-dashboard')">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Assessments
+        </div>
+      </div>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="avatar">SJ</div>
+          <div class="avatar-name">Sarah Johnson</div>
+        </div>
+      </div>
+    </div>
+    <div class="main-content">
+      <div class="topbar">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button class="btn btn-ghost btn-sm" onclick="go('screen-create-step1')">← Back</button>
+          <div class="topbar-title">Sales Team DISC Assessment</div>
+        </div>
+        <span class="badge badge-indigo">DISC</span>
+      </div>
+      <div class="page-content" style="max-width:720px;">
+        <div class="steps">
+          <div class="step done">
+            <div class="step-num">✓</div>
+            Setup
+          </div>
+          <div class="step-line"></div>
+          <div class="step active">
+            <div class="step-num">2</div>
+            Questions
+          </div>
+          <div class="step-line"></div>
+          <div class="step">
+            <div class="step-num">3</div>
+            Publish & Send
+          </div>
+        </div>
+
+        <div class="tabs">
+          <div class="tab active" onclick="switchTab('manual')">Manual</div>
+          <div class="tab" onclick="switchTab('ai')">AI Generate</div>
+        </div>
+
+        <!-- Manual Tab -->
+        <div id="tab-manual" class="tab-panel active">
+          <div class="question-card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+              <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;">Question 1</div>
+              <button class="btn btn-ghost btn-sm" style="color:#EF4444;">Remove</button>
+            </div>
+            <div class="question-text">When facing a deadline, you tend to...</div>
+            <div class="option-row">
+              <div class="option-text">Take charge and assign tasks to get it done quickly</div>
+              <span class="trait-badge trait-D">D</span>
+            </div>
+            <div class="option-row">
+              <div class="option-text">Rally the team and keep energy and morale high</div>
+              <span class="trait-badge trait-I">I</span>
+            </div>
+            <div class="option-row">
+              <div class="option-text">Work steadily through your list without rushing others</div>
+              <span class="trait-badge trait-S">S</span>
+            </div>
+            <div class="option-row">
+              <div class="option-text">Create a detailed plan and ensure nothing is missed</div>
+              <span class="trait-badge trait-C">C</span>
+            </div>
+          </div>
+
+          <div class="question-card" style="border-style:dashed;background:#FAFAFA;cursor:pointer;" onclick="alert('Add question form would open here')">
+            <div style="text-align:center;padding:12px;color:var(--muted);font-size:13px;">
+              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:block;margin:0 auto 6px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add a question manually
+            </div>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;margin-top:20px;">
+            <span style="font-size:13px;color:var(--muted);">1 of 10 questions added</span>
+            <button class="btn btn-primary" onclick="go('screen-send')">Next: Publish & Send →</button>
+          </div>
+        </div>
+
+        <!-- AI Tab -->
+        <div id="tab-ai" class="tab-panel">
+          <div class="info-box">
+            AI will generate MCQ questions pre-mapped to DISC traits based on your prompt. Review and edit each question before accepting.
+          </div>
+          <div class="form-group">
+            <label>Describe what you want to assess</label>
+            <textarea placeholder="e.g. Assertiveness, decision-making style, and teamwork in a fast-paced sales environment" style="min-height:100px;"></textarea>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+            <button class="btn btn-primary" onclick="simulateGenerate()">Generate Questions</button>
+            <span style="font-size:12px;color:var(--muted);">Will generate 10 questions</span>
+          </div>
+
+          <div class="generating" id="generating-state">
+            <div class="spinner"></div>
+            <div style="font-size:13px;">Generating DISC-aligned questions...</div>
+          </div>
+
+          <div class="ai-results" id="ai-results">
+            <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:var(--foreground);">10 questions generated — review and accept</div>
+
+            <div class="staged-question">
+              <div class="staged-question-header">
+                <div class="staged-question-text">In a group discussion, you are most likely to...</div>
+                <div class="staged-actions">
+                  <button class="btn btn-outline btn-sm">Edit</button>
+                  <button class="btn btn-ghost btn-sm">↻ Regen</button>
+                  <button class="btn btn-primary btn-sm">Accept</button>
+                </div>
+              </div>
+              <div class="staged-options">
+                <div class="staged-option"><span class="trait-badge trait-D">D</span> Steer the conversation toward a decision</div>
+                <div class="staged-option"><span class="trait-badge trait-I">I</span> Share ideas enthusiastically and build on others'</div>
+                <div class="staged-option"><span class="trait-badge trait-S">S</span> Listen carefully and support others' contributions</div>
+                <div class="staged-option"><span class="trait-badge trait-C">C</span> Ask clarifying questions and check the logic</div>
+              </div>
+            </div>
+
+            <div class="staged-question">
+              <div class="staged-question-header">
+                <div class="staged-question-text">When you receive critical feedback on your work, you typically...</div>
+                <div class="staged-actions">
+                  <button class="btn btn-outline btn-sm">Edit</button>
+                  <button class="btn btn-ghost btn-sm">↻ Regen</button>
+                  <button class="btn btn-primary btn-sm">Accept</button>
+                </div>
+              </div>
+              <div class="staged-options">
+                <div class="staged-option"><span class="trait-badge trait-D">D</span> Acknowledge it quickly and move to next steps</div>
+                <div class="staged-option"><span class="trait-badge trait-I">I</span> Discuss it openly and look for encouragement</div>
+                <div class="staged-option"><span class="trait-badge trait-S">S</span> Reflect on it privately before responding</div>
+                <div class="staged-option"><span class="trait-badge trait-C">C</span> Ask for specific examples and detailed reasoning</div>
+              </div>
+            </div>
+
+            <div style="text-align:center;padding:12px;color:var(--muted);font-size:13px;">+ 8 more questions</div>
+
+            <div style="display:flex;gap:10px;margin-top:12px;">
+              <button class="btn btn-primary" onclick="go('screen-send')">Accept All & Continue →</button>
+              <button class="btn btn-outline">Regenerate All</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 6: PUBLISH & SEND
+     ═══════════════════════════════════════════ -->
+<div id="screen-send" class="screen">
+  <div class="app-layout">
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-mark">B</div>
+        <div class="sidebar-logo-name">BehaviorAssess</div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-item" onclick="go('screen-dashboard')">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Assessments
+        </div>
+      </div>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="avatar">SJ</div>
+          <div class="avatar-name">Sarah Johnson</div>
+        </div>
+      </div>
+    </div>
+    <div class="main-content">
+      <div class="topbar">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button class="btn btn-ghost btn-sm" onclick="go('screen-create-step2')">← Back</button>
+          <div class="topbar-title">Publish & Send</div>
+        </div>
+      </div>
+      <div class="page-content" style="max-width:640px;">
+        <div class="steps">
+          <div class="step done"><div class="step-num">✓</div> Setup</div>
+          <div class="step-line"></div>
+          <div class="step done"><div class="step-num">✓</div> Questions</div>
+          <div class="step-line"></div>
+          <div class="step active"><div class="step-num">3</div> Publish & Send</div>
+        </div>
+
+        <div class="card mb-16">
+          <div class="card-header"><div class="card-title">Assessment Summary</div></div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+              <div><div class="text-muted text-sm">Title</div><div style="font-weight:500;margin-top:3px;">Sales Team DISC Assessment</div></div>
+              <div><div class="text-muted text-sm">Framework</div><div style="margin-top:3px;"><span class="badge badge-indigo">DISC</span></div></div>
+              <div><div class="text-muted text-sm">Questions</div><div style="font-weight:500;margin-top:3px;">10</div></div>
+              <div><div class="text-muted text-sm">Result email</div><div style="font-weight:500;margin-top:3px;color:#16A34A;">Enabled</div></div>
+              <div><div class="text-muted text-sm">Link expiry</div><div style="font-weight:500;margin-top:3px;">7 days</div></div>
+              <div><div class="text-muted text-sm">Status</div><div style="margin-top:3px;"><span class="badge badge-gray" id="status-badge">Draft</span></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="pre-publish">
+          <button class="btn btn-primary btn-full" style="margin-bottom:16px;" onclick="publishAssessment()">Publish Assessment</button>
+          <div style="text-align:center;font-size:12px;color:var(--muted);">Publishing makes the assessment available to send. You can still edit it after publishing.</div>
+        </div>
+
+        <div id="post-publish" style="display:none;">
+          <div class="published-banner">
+            <div class="published-banner-icon">✓</div>
+            <div class="published-banner-text">Assessment published — ready to send</div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><div class="card-title">Invite Participants</div></div>
+            <div class="card-body">
+              <div class="form-group">
+                <label>Paste email addresses</label>
+                <textarea placeholder="james@candidate.com, priya@candidate.com, ..." style="min-height:80px;"></textarea>
+                <div style="font-size:12px;color:var(--muted);margin-top:4px;">Separate addresses with commas or new lines.</div>
+              </div>
+              <div style="text-align:center;color:var(--muted);font-size:13px;padding:8px 0;">— or —</div>
+              <div class="upload-zone">
+                <div style="font-size:16px;margin-bottom:4px;">📎</div>
+                Upload a CSV file
+                <div style="font-size:11px;margin-top:3px;">One email address per row</div>
+              </div>
+              <button class="btn btn-primary btn-full mt-16" onclick="go('screen-analytics')">Send Invitations</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 7: ANALYTICS DASHBOARD
+     ═══════════════════════════════════════════ -->
+<div id="screen-analytics" class="screen">
+  <div class="app-layout">
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-mark">B</div>
+        <div class="sidebar-logo-name">BehaviorAssess</div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-item active" onclick="go('screen-dashboard')">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Assessments
+        </div>
+      </div>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="avatar">SJ</div>
+          <div class="avatar-name">Sarah Johnson</div>
+        </div>
+      </div>
+    </div>
+    <div class="main-content">
+      <div class="topbar">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button class="btn btn-ghost btn-sm" onclick="go('screen-dashboard')">← All Assessments</button>
+          <div class="topbar-title">Sales Team DISC Assessment</div>
+          <span class="badge badge-green">Published</span>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="go('screen-send')">Send More</button>
+      </div>
+      <div class="page-content">
+        <!-- Stats -->
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-label">Completion Rate</div>
+            <div class="stat-value">80%</div>
+            <div class="stat-sub">4 of 5 participants completed</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Avg. Time to Complete</div>
+            <div class="stat-value">8.4<span style="font-size:16px;font-weight:400;"> min</span></div>
+            <div class="stat-sub">Across 4 completed sessions</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Pending</div>
+            <div class="stat-value">1</div>
+            <div class="stat-sub">Link expires in 3 days</div>
+          </div>
+        </div>
+
+        <div class="grid-2" style="gap:20px;align-items:start;">
+          <!-- Trait Distribution -->
+          <div class="card">
+            <div class="card-header"><div class="card-title">DISC Trait Averages</div></div>
+            <div class="card-body">
+              <div class="trait-bar-row">
+                <div class="trait-bar-label">Dominance (D)</div>
+                <div class="trait-bar-track"><div class="trait-bar-fill" style="width:65%;background:#7C3AED;"></div></div>
+                <div class="trait-bar-pct">65%</div>
+              </div>
+              <div class="trait-bar-row">
+                <div class="trait-bar-label">Influence (I)</div>
+                <div class="trait-bar-track"><div class="trait-bar-fill" style="width:72%;background:#D97706;"></div></div>
+                <div class="trait-bar-pct">72%</div>
+              </div>
+              <div class="trait-bar-row">
+                <div class="trait-bar-label">Steadiness (S)</div>
+                <div class="trait-bar-track"><div class="trait-bar-fill" style="width:48%;background:#16A34A;"></div></div>
+                <div class="trait-bar-pct">48%</div>
+              </div>
+              <div class="trait-bar-row">
+                <div class="trait-bar-label">Conscientiousness (C)</div>
+                <div class="trait-bar-track"><div class="trait-bar-fill" style="width:58%;background:#2563EB;"></div></div>
+                <div class="trait-bar-pct">58%</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Participant List -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Participants</div>
+              <select class="btn btn-outline btn-sm" style="padding:4px 8px;">
+                <option>All statuses</option>
+                <option>Completed</option>
+                <option>Invited</option>
+                <option>In Progress</option>
+                <option>Expired</option>
+              </select>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Participant</th>
+                  <th>Status</th>
+                  <th>Dominant</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr onclick="openPanel('james')">
+                  <td>
+                    <div style="font-weight:500;">James Okafor</div>
+                    <div style="font-size:11px;color:var(--muted);">james@candidate.com</div>
+                  </td>
+                  <td><span class="badge badge-green">Completed</span></td>
+                  <td><span class="trait-badge trait-D">D</span></td>
+                  <td style="color:var(--muted);font-size:12px;">Sep 1</td>
+                </tr>
+                <tr onclick="openPanel('priya')">
+                  <td>
+                    <div style="font-weight:500;">Priya Sharma</div>
+                    <div style="font-size:11px;color:var(--muted);">priya@candidate.com</div>
+                  </td>
+                  <td><span class="badge badge-green">Completed</span></td>
+                  <td><span class="trait-badge trait-I">I</span></td>
+                  <td style="color:var(--muted);font-size:12px;">Sep 2</td>
+                </tr>
+                <tr onclick="openPanel('marcus')">
+                  <td>
+                    <div style="font-weight:500;">Marcus Chen</div>
+                    <div style="font-size:11px;color:var(--muted);">marcus@candidate.com</div>
+                  </td>
+                  <td><span class="badge badge-green">Completed</span></td>
+                  <td><span class="trait-badge trait-S">S</span></td>
+                  <td style="color:var(--muted);font-size:12px;">Sep 3</td>
+                </tr>
+                <tr onclick="openPanel('aisha')">
+                  <td>
+                    <div style="font-weight:500;">Aisha Patel</div>
+                    <div style="font-size:11px;color:var(--muted);">aisha@candidate.com</div>
+                  </td>
+                  <td><span class="badge badge-green">Completed</span></td>
+                  <td><span class="trait-badge trait-C">C</span></td>
+                  <td style="color:var(--muted);font-size:12px;">Sep 4</td>
+                </tr>
+                <tr>
+                  <td>
+                    <div style="font-weight:500;">Tom Reeves</div>
+                    <div style="font-size:11px;color:var(--muted);">tom@candidate.com</div>
+                  </td>
+                  <td><span class="badge badge-blue">Invited</span></td>
+                  <td>—</td>
+                  <td style="color:var(--muted);font-size:12px;">—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Side Panel Overlay -->
+  <div class="side-panel-overlay" id="panel-overlay" onclick="closePanel()"></div>
+  <div class="side-panel" id="side-panel">
+    <div class="side-panel-header">
+      <div>
+        <div style="font-weight:600;font-size:15px;" id="panel-name">James Okafor</div>
+        <div style="font-size:12px;color:var(--muted);" id="panel-email">james@candidate.com</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="closePanel()">✕</button>
+    </div>
+    <div class="side-panel-body">
+      <div style="margin-bottom:16px;">
+        <span class="badge badge-green">Completed</span>
+        <span style="font-size:12px;color:var(--muted);margin-left:8px;">Sep 1, 2026 · 7 min 42 sec</span>
+      </div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:16px;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;">Behavioral Profile — DISC</div>
+
+      <div class="profile-trait">
+        <div class="profile-trait-header">
+          <div class="profile-trait-name">Dominance (D)</div>
+          <div class="profile-trait-score">78 / 100 · High</div>
+        </div>
+        <div class="profile-trait-bar"><div class="profile-trait-fill" style="width:78%;background:#7C3AED;"></div></div>
+        <div class="profile-trait-desc">James demonstrates a strong drive for results and takes charge in ambiguous situations. Tends to be direct in communication, comfortable making quick decisions, and motivated by challenges and competitive goals.</div>
+      </div>
+
+      <div class="profile-trait">
+        <div class="profile-trait-header">
+          <div class="profile-trait-name">Influence (I)</div>
+          <div class="profile-trait-score">55 / 100 · Mid</div>
+        </div>
+        <div class="profile-trait-bar"><div class="profile-trait-fill" style="width:55%;background:#D97706;"></div></div>
+        <div class="profile-trait-desc">Shows moderate influence orientation — can be engaging and persuasive when needed but does not rely on social dynamics as a primary motivator. Comfortable working independently.</div>
+      </div>
+
+      <div class="profile-trait">
+        <div class="profile-trait-header">
+          <div class="profile-trait-name">Steadiness (S)</div>
+          <div class="profile-trait-score">38 / 100 · Low</div>
+        </div>
+        <div class="profile-trait-bar"><div class="profile-trait-fill" style="width:38%;background:#16A34A;"></div></div>
+        <div class="profile-trait-desc">Lower steadiness suggests James adapts quickly to change and prefers a fast-paced environment over routine. May move on from completed work quickly rather than maintaining long-term consistency.</div>
+      </div>
+
+      <div class="profile-trait">
+        <div class="profile-trait-header">
+          <div class="profile-trait-name">Conscientiousness (C)</div>
+          <div class="profile-trait-score">44 / 100 · Mid</div>
+        </div>
+        <div class="profile-trait-bar"><div class="profile-trait-fill" style="width:44%;background:#2563EB;"></div></div>
+        <div class="profile-trait-desc">Moderate conscientiousness — can follow processes when necessary but prefers action over analysis. Likely to focus on the big picture rather than detailed accuracy under time pressure.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 8: PARTICIPANT — LANDING
+     ═══════════════════════════════════════════ -->
+<div id="screen-participant-landing" class="screen">
+  <div class="participant-wrap">
+    <div class="participant-card">
+      <div class="participant-logo">
+        <div class="p-logo-mark">B</div>
+        <span style="font-size:13px;color:var(--muted);">BehaviorAssess</span>
+      </div>
+      <div style="font-size:22px;font-weight:700;margin-bottom:10px;">Sales Team DISC Assessment</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:24px;">Invited by Acme Corp · Link expires Sep 12, 2026</div>
+      <div style="background:#F8FAFC;border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:28px;">
+        <div style="font-size:13px;font-weight:500;margin-bottom:8px;">Before you begin</div>
+        <ul style="font-size:13px;color:var(--muted);padding-left:18px;line-height:1.8;">
+          <li>10 multiple-choice questions</li>
+          <li>Takes approximately 8–12 minutes</li>
+          <li>No right or wrong answers — choose what feels most natural</li>
+          <li>You can save your progress and return using this same link</li>
+        </ul>
+      </div>
+      <button class="btn btn-primary btn-full" style="padding:12px;" onclick="go('screen-participant-question')">Start Assessment →</button>
+      <div style="text-align:center;font-size:12px;color:var(--muted);margin-top:16px;">No account required. Your link is unique to you.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 9: PARTICIPANT — QUESTION
+     ═══════════════════════════════════════════ -->
+<div id="screen-participant-question" class="screen">
+  <div class="participant-wrap" style="align-items:flex-start;padding:40px 20px;">
+    <div class="participant-card" style="max-width:640px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="p-logo-mark">B</div>
+          <span style="font-size:13px;color:var(--muted);">Sales Team DISC Assessment</span>
+        </div>
+        <div style="font-size:13px;font-weight:600;color:var(--muted);background:#FEF3C7;padding:4px 10px;border-radius:99px;">⏱ 12:45 remaining</div>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-meta">
+          <span style="font-weight:600;">Question 3 of 10</span>
+          <span>30% complete</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:30%;"></div>
+        </div>
+      </div>
+
+      <div style="font-size:17px;font-weight:600;margin-bottom:24px;line-height:1.4;">
+        When working with others on a project, you typically...
+      </div>
+
+      <div id="mcq-options">
+        <div class="mcq-option" onclick="selectOption(this)">
+          <div class="mcq-radio"></div>
+          <div class="mcq-text">Take the lead and keep the team on track toward the goal</div>
+        </div>
+        <div class="mcq-option" onclick="selectOption(this)">
+          <div class="mcq-radio"></div>
+          <div class="mcq-text">Bring enthusiasm and keep team morale high</div>
+        </div>
+        <div class="mcq-option" onclick="selectOption(this)">
+          <div class="mcq-radio"></div>
+          <div class="mcq-text">Support others and make sure no one is left behind</div>
+        </div>
+        <div class="mcq-option" onclick="selectOption(this)">
+          <div class="mcq-radio"></div>
+          <div class="mcq-text">Ensure the plan is thorough and all risks are considered</div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;margin-top:28px;">
+        <button class="btn btn-outline" onclick="go('screen-participant-landing')">← Previous</button>
+        <button class="btn btn-primary" onclick="go('screen-participant-confirm')">Next →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 10: PARTICIPANT — CONFIRMATION
+     ═══════════════════════════════════════════ -->
+<div id="screen-participant-confirm" class="screen">
+  <div class="participant-wrap">
+    <div class="participant-card" style="text-align:center;max-width:480px;">
+      <div class="success-icon">✓</div>
+      <div style="font-size:22px;font-weight:700;margin-bottom:10px;">Assessment Submitted</div>
+      <div style="font-size:14px;color:var(--muted);margin-bottom:28px;line-height:1.6;">
+        Thank you for completing the assessment.<br>
+        Your results will be shared with you shortly via email.
+      </div>
+      <div style="background:#F0F9FF;border:1px solid #BAE6FD;border-radius:var(--radius-lg);padding:16px;font-size:13px;color:#0369A1;margin-bottom:24px;">
+        Results will be sent to <strong>james@candidate.com</strong>
+      </div>
+      <div style="font-size:12px;color:var(--muted);">You can now close this window. Your responses have been recorded.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SETTINGS SCREEN (simple)
+     ═══════════════════════════════════════════ -->
+<div id="screen-settings" class="screen">
+  <div class="app-layout">
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-mark">B</div>
+        <div class="sidebar-logo-name">BehaviorAssess</div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-item" onclick="go('screen-dashboard')">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Assessments
+        </div>
+        <div class="sidebar-item active">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          Settings
+        </div>
+      </div>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="avatar">SJ</div>
+          <div class="avatar-name">Sarah Johnson</div>
+        </div>
+      </div>
+    </div>
+    <div class="main-content">
+      <div class="topbar"><div class="topbar-title">Settings</div></div>
+      <div class="page-content" style="max-width:560px;">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Account</div></div>
+          <div class="card-body">
+            <div class="form-group"><label>Full name</label><input type="text" value="Sarah Johnson" /></div>
+            <div class="form-group"><label>Email address</label><input type="email" value="sarah@acmecorp.com" /></div>
+            <button class="btn btn-primary btn-sm">Save changes</button>
+          </div>
+        </div>
+        <div class="card mt-16">
+          <div class="card-header"><div class="card-title">Password</div></div>
+          <div class="card-body">
+            <div class="form-group"><label>Current password</label><input type="password" /></div>
+            <div class="form-group"><label>New password</label><input type="password" /></div>
+            <button class="btn btn-outline btn-sm">Update password</button>
+          </div>
+        </div>
+        <div class="card mt-16" style="border-color:#FEE2E2;">
+          <div class="card-header"><div class="card-title" style="color:#DC2626;">Danger Zone</div></div>
+          <div class="card-body">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div><div style="font-size:13px;font-weight:500;">Delete account</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">Permanently delete your account and all assessments.</div></div>
+              <button class="btn btn-danger btn-sm">Delete account</button>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:16px;text-align:right;">
+          <button class="btn btn-ghost btn-sm" onclick="go('screen-login')" style="color:var(--muted);">Sign out</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     NAV BAR (prototype helper)
+     ═══════════════════════════════════════════ -->
+<div style="position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(9,9,11,0.85);backdrop-filter:blur(8px);border-radius:99px;padding:8px 16px;display:flex;gap:6px;z-index:200;">
+  <button class="btn btn-sm" style="background:rgba(255,255,255,0.1);color:white;font-size:12px;" onclick="go('screen-login')">Login</button>
+  <button class="btn btn-sm" style="background:rgba(255,255,255,0.1);color:white;font-size:12px;" onclick="go('screen-dashboard')">Dashboard</button>
+  <button class="btn btn-sm" style="background:rgba(255,255,255,0.1);color:white;font-size:12px;" onclick="go('screen-analytics')">Analytics</button>
+  <button class="btn btn-sm" style="background:rgba(255,255,255,0.1);color:white;font-size:12px;" onclick="go('screen-participant-landing')">Participant</button>
+  <button class="btn btn-sm" style="background:rgba(255,255,255,0.1);color:white;font-size:12px;" onclick="go('screen-participant-question')">Question</button>
+</div>
+
+<script>
+  // === NAVIGATION ===
+  function go(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const target = document.getElementById(screenId);
+    if (target) { target.classList.add('active'); window.scrollTo(0,0); }
+  }
+
+  // === TABS ===
+  function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(t => { if ((tab === 'manual' && t.textContent === 'Manual') || (tab === 'ai' && t.textContent === 'AI Generate')) t.classList.add('active'); });
+    document.getElementById('tab-' + tab).classList.add('active');
+  }
+
+  // === AI GENERATE SIMULATION ===
+  function simulateGenerate() {
+    document.getElementById('generating-state').classList.add('show');
+    document.getElementById('ai-results').classList.remove('show');
+    setTimeout(() => {
+      document.getElementById('generating-state').classList.remove('show');
+      document.getElementById('ai-results').classList.add('show');
+    }, 2000);
+  }
+
+  // === PUBLISH ===
+  function publishAssessment() {
+    document.getElementById('pre-publish').style.display = 'none';
+    document.getElementById('post-publish').style.display = 'block';
+    document.getElementById('status-badge').textContent = 'Published';
+    document.getElementById('status-badge').className = 'badge badge-green';
+  }
+
+  // === MCQ SELECTION ===
+  function selectOption(el) {
+    document.querySelectorAll('.mcq-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  // === SIDE PANEL ===
+  function openPanel(person) {
+    document.getElementById('panel-overlay').classList.add('open');
+    document.getElementById('side-panel').classList.add('open');
+  }
+  function closePanel() {
+    document.getElementById('panel-overlay').classList.remove('open');
+    document.getElementById('side-panel').classList.remove('open');
+  }
+</script>
+</body>
+</html>

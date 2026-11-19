@@ -1,0 +1,150 @@
+[
+  {
+    "model": "frameworks.framework",
+    "pk": 1,
+    "fields": {
+      "name": "DISC",
+      "slug": "disc",
+      "description": "DISC is a behavior assessment tool based on four behavioral traits: Dominance, Influence, Steadiness, and Conscientiousness.",
+      "normalization_min": 0,
+      "normalization_max": 100
+    }
+  },
+  {
+    "model": "frameworks.framework",
+    "pk": 2,
+    "fields": {
+      "name": "Big Five",
+      "slug": "big-five",
+      "description": "The Big Five personality traits (OCEAN) are the best accepted and most commonly used model of personality in academic psychology.",
+      "normalization_min": 0,
+      "normalization_max": 100
+    }
+  },
+  {
+    "model": "frameworks.trait",
+    "pk": 1,
+    "fields": {
+      "framework": 1,
+      "name": "Dominance",
+      "code": "D",
+      "description": "How you respond to problems and challenges. High D individuals are results-oriented, direct, and competitive.",
+      "order": 1
+    }
+  },
+  {
+    "model": "frameworks.trait",
+    "pk": 2,
+    "fields": {
+      "framework": 1,
+      "name": "Influence",
+      "code": "I",
+      "description": "How you influence others. High I individuals are enthusiastic, collaborative, and optimistic.",
+      "order": 2
+    }
+  },
+  {
+    "model": "frameworks.trait",
+    "pk": 3,
+    "fields": {
+      "framework": 1,
+      "name": "Steadiness",
+      "code": "S",
+      "description": "How you respond to pace and consistency. High S individuals are patient, reliable, and team-oriented.",
+      "order": 3
+    }
+  },
+  {
+    "model": "frameworks.trait",
+    "pk": 4,
+    "fields": {
+      "framework": 1,
+      "name": "Conscientiousness",
+      "code": "C",
+      "description": "How you respond to rules and procedures. High C individuals are analytical, systematic, and quality-focused.",
+      "order": 4
+    }
+  },
+  {
+    "model": "frameworks.trait",
+    "pk": 5,
+    "fields": {
+      "framework": 2,
+      "name": "Openness",
+      "code": "O",
+      "description": "Openness to experience. Reflects the degree of intellectual curiosity, creativity, and preference for novelty.",
+      "order": 1
+    }
+  },
+  {
+    "model": "frameworks.trait",
+    "pk": 6,
+    "fields": {
+      "framework": 2,
+      "name": "Conscientiousness",
+      "code": "C",
+      "description": "Tendency to be organized and dependable, show self-discipline, and act dutifully.",
+      "order": 2
+    }
+  },
+  {
+    "model": "frameworks.trait",
+    "pk": 7,
+    "fields": {
+      "framework": 2,
+      "name": "Extraversion",
+      "code": "E",
+      "description": "Energy, positive emotions, and the tendency to seek stimulation in the company of others.",
+      "order": 3
+    }
+  },
+  {
+    "model": "frameworks.trait",
+    "pk": 8,
+    "fields": {
+      "framework": 2,
+      "name": "Agreeableness",
+      "code": "A",
+      "description": "Tendency to be compassionate and cooperative rather than suspicious and antagonistic towards others.",
+      "order": 4
+    }
+  },
+  {
+    "model": "frameworks.trait",
+    "pk": 9,
+    "fields": {
+      "framework": 2,
+      "name": "Neuroticism",
+      "code": "N",
+      "description": "Tendency to experience unpleasant emotions easily, such as anger, anxiety, depression, and vulnerability.",
+      "order": 5
+    }
+  },
+  {"model": "frameworks.scoreband", "pk": 1, "fields": {"trait": 1, "name": "low", "min_score": 0, "max_score": 33, "label": "Collaborative", "interpretive_text": "You tend to prefer working cooperatively and may avoid direct confrontation. You value group harmony and consensus-building over asserting individual authority."}},
+  {"model": "frameworks.scoreband", "pk": 2, "fields": {"trait": 1, "name": "mid", "min_score": 34, "max_score": 66, "label": "Balanced", "interpretive_text": "You balance assertiveness with cooperation. You can take charge when needed but also know when to collaborate and defer to others."}},
+  {"model": "frameworks.scoreband", "pk": 3, "fields": {"trait": 1, "name": "high", "min_score": 67, "max_score": 100, "label": "Decisive", "interpretive_text": "You are results-oriented, assertive, and direct. You take initiative, make decisions quickly, and thrive in competitive environments where you can drive outcomes."}},
+  {"model": "frameworks.scoreband", "pk": 4, "fields": {"trait": 2, "name": "low", "min_score": 0, "max_score": 33, "label": "Reserved", "interpretive_text": "You prefer working independently and may find large group settings draining. You tend to be more analytical and task-focused in your approach to others."}},
+  {"model": "frameworks.scoreband", "pk": 5, "fields": {"trait": 2, "name": "mid", "min_score": 34, "max_score": 66, "label": "Adaptable", "interpretive_text": "You are comfortable in both social and independent work settings. You can be persuasive and enthusiastic when needed, while also focusing on task completion."}},
+  {"model": "frameworks.scoreband", "pk": 6, "fields": {"trait": 2, "name": "high", "min_score": 67, "max_score": 100, "label": "Enthusiastic", "interpretive_text": "You are outgoing, persuasive, and energized by people. You excel at building relationships, motivating others, and creating positive team energy. You thrive in collaborative and social environments."}},
+  {"model": "frameworks.scoreband", "pk": 7, "fields": {"trait": 3, "name": "low", "min_score": 0, "max_score": 33, "label": "Dynamic", "interpretive_text": "You embrace change and variety. You may thrive in fast-paced, evolving environments and can adapt quickly to new situations and shifting priorities."}},
+  {"model": "frameworks.scoreband", "pk": 8, "fields": {"trait": 3, "name": "mid", "min_score": 34, "max_score": 66, "label": "Flexible", "interpretive_text": "You balance stability with adaptability. You can work effectively in both structured and changing environments, maintaining reliability while remaining open to new approaches."}},
+  {"model": "frameworks.scoreband", "pk": 9, "fields": {"trait": 3, "name": "high", "min_score": 67, "max_score": 100, "label": "Dependable", "interpretive_text": "You are patient, consistent, and highly reliable. You build strong, long-term relationships and are the anchor of your team. You excel in environments that value stability and steady execution."}},
+  {"model": "frameworks.scoreband", "pk": 10, "fields": {"trait": 4, "name": "low", "min_score": 0, "max_score": 33, "label": "Instinctive", "interpretive_text": "You rely on intuition and big-picture thinking over detailed analysis. You move quickly and may delegate details to others, prioritizing speed and momentum over perfection."}},
+  {"model": "frameworks.scoreband", "pk": 11, "fields": {"trait": 4, "name": "mid", "min_score": 34, "max_score": 66, "label": "Pragmatic", "interpretive_text": "You balance thoroughness with practicality. You apply systematic thinking when the stakes are high but can also move quickly when needed without getting lost in details."}},
+  {"model": "frameworks.scoreband", "pk": 12, "fields": {"trait": 4, "name": "high", "min_score": 67, "max_score": 100, "label": "Analytical", "interpretive_text": "You are detail-oriented, systematic, and precise. You set high standards and ensure quality through careful analysis. You are most comfortable when you have clear processes, accurate data, and time to think things through."}},
+  {"model": "frameworks.scoreband", "pk": 13, "fields": {"trait": 5, "name": "low", "min_score": 0, "max_score": 33, "label": "Conventional", "interpretive_text": "You prefer tried-and-true methods and established routines. You are practical and focused, bringing consistency and reliability to your work."}},
+  {"model": "frameworks.scoreband", "pk": 14, "fields": {"trait": 5, "name": "mid", "min_score": 34, "max_score": 66, "label": "Curious", "interpretive_text": "You balance creativity with pragmatism. You enjoy exploring new ideas when they serve a clear purpose, while maintaining a practical grounding in your approach."}},
+  {"model": "frameworks.scoreband", "pk": 15, "fields": {"trait": 5, "name": "high", "min_score": 67, "max_score": 100, "label": "Inventive", "interpretive_text": "You are highly curious, imaginative, and intellectually engaged. You seek out new experiences, enjoy abstract thinking, and thrive in environments that value creativity and innovation."}},
+  {"model": "frameworks.scoreband", "pk": 16, "fields": {"trait": 6, "name": "low", "min_score": 0, "max_score": 33, "label": "Spontaneous", "interpretive_text": "You are flexible and adaptable, often preferring to respond to situations as they arise rather than following rigid plans. You may prioritize exploration over structure."}},
+  {"model": "frameworks.scoreband", "pk": 17, "fields": {"trait": 6, "name": "mid", "min_score": 34, "max_score": 66, "label": "Organized", "interpretive_text": "You balance structure with flexibility. You can organize and plan effectively when needed, while remaining adaptable when circumstances change."}},
+  {"model": "frameworks.scoreband", "pk": 18, "fields": {"trait": 6, "name": "high", "min_score": 67, "max_score": 100, "label": "Disciplined", "interpretive_text": "You are highly organized, dependable, and self-disciplined. You set high standards, follow through on commitments, and excel in roles requiring meticulous planning and execution."}},
+  {"model": "frameworks.scoreband", "pk": 19, "fields": {"trait": 7, "name": "low", "min_score": 0, "max_score": 33, "label": "Introverted", "interpretive_text": "You recharge through solitude and prefer depth over breadth in your relationships. You bring thoughtful, focused energy to your work and may find large social settings draining."}},
+  {"model": "frameworks.scoreband", "pk": 20, "fields": {"trait": 7, "name": "mid", "min_score": 34, "max_score": 66, "label": "Ambivert", "interpretive_text": "You move comfortably between social engagement and independent work. You can energize a room when needed and also focus deeply when working alone."}},
+  {"model": "frameworks.scoreband", "pk": 21, "fields": {"trait": 7, "name": "high", "min_score": 67, "max_score": 100, "label": "Extraverted", "interpretive_text": "You are sociable, energetic, and thrive in team environments. You bring enthusiasm and energy to group settings and are energized by interaction with others."}},
+  {"model": "frameworks.scoreband", "pk": 22, "fields": {"trait": 8, "name": "low", "min_score": 0, "max_score": 33, "label": "Independent", "interpretive_text": "You are direct, skeptical, and comfortable with conflict when necessary. You prioritize objectivity and may challenge assumptions rather than accommodating others by default."}},
+  {"model": "frameworks.scoreband", "pk": 23, "fields": {"trait": 8, "name": "mid", "min_score": 34, "max_score": 66, "label": "Cooperative", "interpretive_text": "You balance directness with empathy. You can assert your views confidently while remaining sensitive to the needs and feelings of those around you."}},
+  {"model": "frameworks.scoreband", "pk": 24, "fields": {"trait": 8, "name": "high", "min_score": 67, "max_score": 100, "label": "Harmonious", "interpretive_text": "You are warm, empathetic, and deeply collaborative. You prioritize group harmony and are skilled at building trust and resolving conflicts. You bring a compassionate and supportive presence to your team."}},
+  {"model": "frameworks.scoreband", "pk": 25, "fields": {"trait": 9, "name": "low", "min_score": 0, "max_score": 33, "label": "Resilient", "interpretive_text": "You are emotionally stable and calm under pressure. You handle stress effectively and rarely allow setbacks to disrupt your performance or mood."}},
+  {"model": "frameworks.scoreband", "pk": 26, "fields": {"trait": 9, "name": "mid", "min_score": 34, "max_score": 66, "label": "Sensitive", "interpretive_text": "You experience a normal range of emotional responses. You can feel stress or frustration under pressure, but generally recover and manage your emotional state effectively."}},
+  {"model": "frameworks.scoreband", "pk": 27, "fields": {"trait": 9, "name": "high", "min_score": 67, "max_score": 100, "label": "Reactive", "interpretive_text": "You experience emotions intensely and may be more sensitive to stress, criticism, or uncertainty than others. Building routines and support systems can help you channel this emotional richness productively."}}
+]
